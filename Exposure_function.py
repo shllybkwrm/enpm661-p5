@@ -1,7 +1,83 @@
 from pylab import *
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
 import matplotlib.pyplot as plt
 import numpy as np
 
+"""The high-level cell was initially designed and constructed
+to accommodate the size and radiological conditions
+associated with a full-sized Westinghouse commercial plant
+fuel assembly. As such, this particular cell is relatively large
+(24 feet long x 5 feet deep x 12 feet high) and is constructed
+with extremely thick high-density poured concrete walls
+(minimum wall thickness of 27 inches) for additional
+radiological shielding.
+
+The high-level cell has four remote handling stations and
+multiple remote cameras with live video feed viewing monitors.
+A heavy-duty manipulator with a hoist capability of 1,000 pounds
+
+"""
+
+def make(xcoord,ycoord,length, width):
+    x=np.linspace((xcoord-length/2),(xcoord+length/2),length+1,dtype=int)
+    y=np.linspace((ycoord+width/2),(ycoord-width/2),width+1,dtype=int)
+    x_1,y_1=np.meshgrid(x,y, indexing='xy')
+    points = np.array(list(zip(x_1.flatten(),y_1.flatten())))
+    vertices = [((xcoord-length/2), (ycoord-width/2)), ((xcoord-length/2), (ycoord+width/2)), ((xcoord+length/2), (ycoord+width/2)), ((xcoord+length/2), (ycoord-width/2)), (0, 0)]
+    return points, vertices
+####################ROBOT COORDINATE
+robot_x_coord=30  #LOCATION OF THE EQUIPMENT ENTRY DOOR WHERE ROBOT WILL START
+robot_y_coord=30  #LOCATION OF THE EQUIPMENT ENTRY DOOR WHERE ROBOT WILL START
+robot_height=6
+robot_bredth=6
+Robot_points,rvertices=make(robot_x_coord,robot_y_coord,robot_bredth,robot_height)
+###########PLOTTING THE ROBOT################
+rcodes = [Path.MOVETO] + [Path.LINETO]*3 + [Path.CLOSEPOLY]
+robot = Path(rvertices,rcodes)
+robotpatch = PathPatch(robot, facecolor='green', edgecolor='green')
+####################PLOTTING SOURCE 1
+circle=Path.circle((366,76),radius=1,readonly=False)
+source1patch=PathPatch(circle, facecolor='red', edgecolor='green')
+####################PLOTTING SOURCE 2
+circle=Path.circle((182,76),radius=1,readonly=False)
+source2patch=PathPatch(circle, facecolor='red', edgecolor='green')
+####################PLOTTING SOURCE 3
+circle=Path.circle((548,76),radius=1,readonly=False)
+source3patch=PathPatch(circle, facecolor='red', edgecolor='green')
+####################PLOTTING DRY STORAGE CASK
+circle=Path.circle((200,100),radius=20,readonly=False)
+sourcedrycast1=PathPatch(circle, facecolor='red', edgecolor='red')
+######################PLOTTING DRY STORAGE CASK
+circle=Path.circle((400,100),radius=20,readonly=False)
+sourcedrycast2=PathPatch(circle, facecolor='red', edgecolor='green')
+######################PLOTTING DRY STORAGE CASK
+circle=Path.circle((600,100),radius=20,readonly=False)
+sourcedrycast3=PathPatch(circle, facecolor='red', edgecolor='green')
+####################TOOL BOX COORDINATE
+TB_x_coord=400  #LOCATION OF TOOL BOX center
+TB_y_coord=40  #LOCATION OF TOOL BOX center
+TB_length= 200
+TB_height= 10
+TB_points, TBvertices=make(TB_x_coord,TB_y_coord,TB_length,TB_height)
+TB = Path(TBvertices,rcodes)
+TBpatch = PathPatch(TB, facecolor='green', edgecolor='green')
+######PLOTTING#####################
+fig, ax = plt.subplots()
+ax.add_patch(robotpatch)
+ax.add_patch(TBpatch)
+ax.add_patch(source1patch)
+ax.add_patch(source2patch)
+ax.add_patch(source3patch)
+ax.add_patch(sourcedrycast1)
+ax.add_patch(sourcedrycast2)
+ax.add_patch(sourcedrycast3)
+ax.set_title("Westinghouse Hot Cell")
+
+ax.autoscale_view()
+plt.xlim(0,732)
+plt.ylim(0,152)
+plt.show()
 air_density= 1.205e-3 # Dry air near sea level in g cm3
 
 #####################Function for extrapolating attenuation
@@ -14,8 +90,9 @@ def extrapolation(isotope):
 
 
 ######################Defining the map #########################
-room_length=3 # cm
-room_width=4 # cm
+room_length= 152 # cm
+room_width= 152 # cm
+Source_location=[20,40]
 x=np.linspace(-room_length/2,room_length/2,room_length+1)
 y=np.linspace(-room_width/2,room_width/2,room_width+1)
 X,Y = np.meshgrid(x,y, indexing='xy')
@@ -28,10 +105,28 @@ points = np.array(list(zip(X.flatten(),Y.flatten())))
 cesium_137 = np.array([0.662,8.04e-2,7.065e-2,0.6,0.8]) #mass interaction coefficient[MeV,mass interactions ( cm2/g),from Faw and Shultis,energis from Faw and Shultis]
 interaction_Coefficient= np.array([extrapolation(cesium_137)]) #cm2/g
 total_miu= interaction_Coefficient*air_density # 1/cm
-Source_Strength = 1e24/((4* np.pi)*(R**2))# particles/cm2 isotropic source emmiting 1e24 particles at origin
-attinuation_at_R= np.exp(-total_miu*np.abs(R)) 
+Source_Strength = 9.44601235e+17/(((4* np.pi)*(R*R)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
+attinuation_at_R= np.exp(-(total_miu*np.abs(R))) 
 ResponseFunction=np.array(1.835e-8*cesium_137[0]*interaction_Coefficient) #R/cm2, R=roentgen
-Exposure=ResponseFunction*Source_Strength*attinuation_at_R # R
-print(Exposure)
+Exposure_rate=ResponseFunction*Source_Strength*attinuation_at_R # R
+##################Westinghhouse High-level Hot Cell
+
+##print(X,"X")
+##print(Y,"Y")
+print (R,"R")
+print(Exposure_rate, "Exposure_rate")
 print (points)
+###########PLOTTING THE SOURCET################
+circle=Path.circle((75,75),radius=170,readonly=False)
+sourcepatch = PathPatch(circle, facecolor='None', edgecolor='green')
+fig1, ax = plt.subplots()
+im = ax.imshow(Exposure_rate)
+fig2, ax1 = plt.subplots()
+ax1.add_patch(sourcepatch)
+ax1.set_title('Map Space')
+
+ax1.autoscale_view()
+plt.xlim(0,300)
+plt.ylim(0,200)
+plt.show()
 
