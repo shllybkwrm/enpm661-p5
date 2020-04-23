@@ -2,6 +2,7 @@ from pylab import *
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import numpy as np
 import itertools
 
@@ -81,28 +82,6 @@ plt.ylim(0,152)
 ##plt.show()
 argon_density= 0.001784 # Dry air near sea level in g cm3
 
-##################### Functions for calculating source distances to every point
-#def distance_2(p1,p2):
-#    distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
-#    return distance
-Xpts = range(732)
-Ypts = range(152)
-xv,yv = np.meshgrid(Xpts, Ypts, sparse=False, indexing='xy')
-#coords = np.column_stack((xv.ravel(),yv.ravel()))
-#coords = list(itertools.product(x_points, y_points))
-#print(xv)
-d_source1 = np.zeros([732,152])
-d_source2 = np.zeros([732,152])
-d_source3 = np.zeros([732,152])
-for x in Xpts:
-    for y in Ypts:
-        point = np.array([xv[y,x], yv[y,x]])
-        d_source1[x,y] = np.linalg.norm(point-[366,76])
-        d_source2[x,y] = np.linalg.norm(point-[182,76])
-        d_source3[x,y] = np.linalg.norm(point-[548,76])
-##print(d_source1)
-##print(d_source2)
-##print(d_source3)
 
 ##################### Function for extrapolating attenuation
 ##################### Coefficients from NIST tables
@@ -114,15 +93,37 @@ def extrapolation(isotope):
 
 
 ###################### Defining the map #########################
-room_length= 732 # cm
-room_width= 152 # cm
-Source_location=[366,76]
+room_length = 732 # cm
+room_width = 152 # cm
+Source1_location = [366,76]
+Source2_location = [182,76]
+Source3_location = [548,76]
 x=np.linspace(-room_length/2,room_length/2,room_length+1)
 y=np.linspace(-room_width/2,room_width/2,room_width+1)
 X,Y = np.meshgrid(x,y, indexing='xy')
 a=np.array(((0,X),(0,Y)))
 R=np.linalg.norm(a) #The 2 norm of each point gives the distance from the center of the room
 points = np.array(list(zip(X.flatten(),Y.flatten())))
+
+
+##################### Calculate source distances to every point
+Xpts = range(room_length)
+Ypts = range(room_width)
+xv,yv = np.meshgrid(Xpts, Ypts, sparse=False, indexing='xy')
+#coords = np.column_stack((xv.ravel(),yv.ravel()))
+#coords = list(itertools.product(x_points, y_points))
+#print(xv)
+d_source1 = np.zeros([room_width, room_length])
+d_source2 = np.zeros([room_width, room_length])
+d_source3 = np.zeros([room_width, room_length])
+for x in Xpts:
+    for y in Ypts:
+        point = np.array([xv[y,x], yv[y,x]])
+        d_source1[y,x] = np.linalg.norm(point - Source1_location)
+        d_source2[y,x] = np.linalg.norm(point - Source2_location)
+        d_source3[y,x] = np.linalg.norm(point - Source3_location)
+##print(d_source1)
+
 
 #################### GammaEnergy = np.array([0.662]) # MeV, characteristic gamma for Cs 137
 #################### For hot cell there will be multiple isotopes with different characteristic energies
@@ -133,7 +134,7 @@ total_miu= interaction_Coefficient*argon_density # 1/cm
 source1_strength= 9.44601235e+17/(((4* np.pi)*(d_source1**2)))
 source2_strength= 9.44601235e+17/(((4* np.pi)*(d_source2**2)))
 source3_strength= 9.44601235e+17/(((4* np.pi)*(d_source3**2)))
-Source_Strength = 9.44601235e+17/(((4* np.pi)*(R*R)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
+Source_Strength = 9.44601235e+17/(((4* np.pi)*(R**2)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 
 
 source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))
@@ -150,23 +151,37 @@ Total_Exposure=Exposure_rate_source1+Exposure_rate_source2+Exposure_rate_source3
 ##print ("Exposure_rate_source1")
 ##print (Exposure_rate_source1)
 
-################## Westinghhouse High-level Hot Cell
-##print(X,"X")
-##print(Y,"Y")
-##print(R,"R")
-print(Exposure_rate, "Exposure_rate")
-##print(points)
 
-########### PLOTTING THE SOURCET################
-circle=Path.circle((75,75),radius=170,readonly=False)
-sourcepatch = PathPatch(circle, facecolor='None', edgecolor='green')
-fig1, ax = plt.subplots()
-im = ax.imshow(Exposure_rate)
-fig2, ax1 = plt.subplots()
-ax1.add_patch(sourcepatch)
-ax1.set_title('Map Space')
+################## Plotting exposure heatmaps
+#print("Exposure_rate: ", Exposure_rate)
+r = np.ptp(Exposure_rate,axis=1)
+#print (Exposure_rate.shape)
+#print("Exposure_rate ranges", r)
 
+fig1, ax1 = plt.subplots()
+#im = ax1.imshow(Exposure_rate)
+#im = ax1.matshow(Exposure_rate, cmap=cm.gray_r, norm=LogNorm(vmin=0.01, vmax=1))
+im = ax1.imshow(Exposure_rate, norm=LogNorm())
+ax1.set_title('Exposure rate in log scale (scenario 1)')
 ax1.autoscale_view()
-plt.xlim(0,300)
-plt.ylim(0,200)
+cb = fig1.colorbar(im)
+cb.set_label("Radiation exposure (R)")
+
+fig2, ax2 = plt.subplots()
+im = ax2.imshow(Total_Exposure, norm=LogNorm())
+ax2.set_title('Total exposure rate in log scale (scenario 2)')
+cb = fig2.colorbar(im)
+cb.set_label("Radiation exposure (R)")
+
+########### PLOTTING THE SOURCE ################
+#fig2, ax2 = plt.subplots()
+#circle=Path.circle((75,75),radius=170,readonly=False)
+#sourcepatch = PathPatch(circle, facecolor='None', edgecolor='green')
+#ax2.add_patch(sourcepatch)
+#ax2.set_title('Map Space')
+#ax2.autoscale_view()
+#plt.xlim(0,300)
+#plt.ylim(0,200)
+
+
 plt.show()
