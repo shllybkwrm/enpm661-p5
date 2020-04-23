@@ -78,7 +78,7 @@ ax.set_title("Westinghouse Hot Cell")
 ax.autoscale_view()
 plt.xlim(0,732)
 plt.ylim(0,152)
-plt.show()
+##plt.show()
 air_density= 1.205e-3 # Dry air near sea level in g cm3
 
 ##################### Functions for calculating source distances to every point
@@ -100,9 +100,9 @@ for x in Xpts:
         d_source1[x,y] = np.linalg.norm(point-[366,76])
         d_source2[x,y] = np.linalg.norm(point-[182,76])
         d_source3[x,y] = np.linalg.norm(point-[548,76])
-#print(d_source1)
-#print(d_source2)
-#print(d_source3)
+print(d_source1)
+print(d_source2)
+print(d_source3)
 
 ##################### Function for extrapolating attenuation
 ##################### Coefficients from NIST tables
@@ -114,9 +114,9 @@ def extrapolation(isotope):
 
 
 ###################### Defining the map #########################
-room_length= 152 # cm
+room_length= 732 # cm
 room_width= 152 # cm
-Source_location=[20,40]
+Source_location=[366,76]
 x=np.linspace(-room_length/2,room_length/2,room_length+1)
 y=np.linspace(-room_width/2,room_width/2,room_width+1)
 X,Y = np.meshgrid(x,y, indexing='xy')
@@ -129,11 +129,25 @@ points = np.array(list(zip(X.flatten(),Y.flatten())))
 cesium_137 = np.array([0.662,8.04e-2,7.065e-2,0.6,0.8]) #mass interaction coefficient[MeV,mass interactions ( cm2/g),from Faw and Shultis,energis from Faw and Shultis]
 interaction_Coefficient= np.array([extrapolation(cesium_137)]) #cm2/g
 total_miu= interaction_Coefficient*air_density # 1/cm
+
+source1_strength= 9.44601235e+17/(((4* np.pi)*(d_source1^2)))
+source2_strength= 9.44601235e+17/(((4* np.pi)*(d_source2^2)))
+source3_strength= 9.44601235e+17/(((4* np.pi)*(d_source3^2)))
 Source_Strength = 9.44601235e+17/(((4* np.pi)*(R*R)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
+
+
+source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))
+source2attenuation_at_R= np.exp(-(total_miu*np.abs(d_source2)))
+source3attenuation_at_R= np.exp(-(total_miu*np.abs(d_source3)))
 attenuation_at_R= np.exp(-(total_miu*np.abs(R)))
+
 ResponseFunction=np.array(1.835e-8*cesium_137[0]*interaction_Coefficient) #R/cm2, R=roentgen
 Exposure_rate=ResponseFunction*Source_Strength*attenuation_at_R # R
-
+Exposure_rate_source1=ResponseFunction*source1_strength*source1attenuation_at_R # R
+Exposure_rate_source2=ResponseFunction*source2_strength*source2attenuation_at_R # R
+Exposure_rate_source3=ResponseFunction*source3_strength*source3attenuation_at_R # R
+##print ("Exposure_rate_source1")
+##print (Exposure_rate_source1)
 
 ################## Westinghhouse High-level Hot Cell
 ##print(X,"X")
