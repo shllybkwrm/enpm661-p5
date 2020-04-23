@@ -81,6 +81,7 @@ plt.xlim(0,732)
 plt.ylim(0,152)
 ##plt.show()
 
+
 ##################### Densities ######################################
 argon_density= 0.001784 # Dry air near sea level in g cm3
 lead_density = 11.36
@@ -90,37 +91,6 @@ cesium_137 = np.array([0.662,8.04e-2,7.065e-2,0.6,0.8]) #mass interaction coeffi
 concrete = np.array([0.662,8.062e-2,6.083e-2, 0.6,0.8])
 lead = np.array([0.662,1.167e-1,8.408e-2, 0.6,0.8])
 
-<<<<<<< HEAD
-##################### Functions for calculating source distances to every point
-#def distance_2(p1,p2):
-#    distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
-#    return distance
-Xpts = range(732)
-Ypts = range(152)
-xv,yv = np.meshgrid(Xpts, Ypts, sparse=False, indexing='xy')
-#coords = np.column_stack((xv.ravel(),yv.ravel()))
-#coords = list(itertools.product(x_points, y_points))
-#print(xv)
-d_source1 = np.zeros([732,152])
-d_source2 = np.zeros([732,152])
-d_source3 = np.zeros([732,152])
-d_cast1 = np.zeros([732,152])
-d_cast2 = np.zeros([732,152])
-d_cast3 = np.zeros([732,152])
-for x in Xpts:
-    for y in Ypts:
-        point = np.array([xv[y,x], yv[y,x]])
-        d_source1[x,y] = np.linalg.norm(point-[366,76])
-        d_source2[x,y] = np.linalg.norm(point-[182,76])
-        d_source3[x,y] = np.linalg.norm(point-[548,76])
-        d_cast1[x,y] = np.linalg.norm(point-[200,100])
-        d_cast2[x,y] = np.linalg.norm(point-[400,100])
-        d_cast3[x,y] = np.linalg.norm(point-[600,100])
-##print(d_source1)
-##print(d_source2)
-##print(d_source3)
-=======
->>>>>>> 47c06d5ac601800d85223e6aeeadca5324c4d2d1
 
 ##################### Function for extrapolating attenuation
 ##################### Coefficients from NIST tables
@@ -155,12 +125,18 @@ xv,yv = np.meshgrid(Xpts, Ypts, sparse=False, indexing='xy')
 d_source1 = np.zeros([room_width, room_length])
 d_source2 = np.zeros([room_width, room_length])
 d_source3 = np.zeros([room_width, room_length])
+d_cast1 = np.zeros([room_width, room_length])
+d_cast2 = np.zeros([room_width, room_length])
+d_cast3 = np.zeros([room_width, room_length])
 for x in Xpts:
     for y in Ypts:
         point = np.array([xv[y,x], yv[y,x]])
         d_source1[y,x] = np.linalg.norm(point - Source1_location)
         d_source2[y,x] = np.linalg.norm(point - Source2_location)
         d_source3[y,x] = np.linalg.norm(point - Source3_location)
+        d_cast1[y,x] = np.linalg.norm(point - [200,100])
+        d_cast2[y,x] = np.linalg.norm(point - [400,100])
+        d_cast3[y,x] = np.linalg.norm(point - [600,100])
 ##print(d_source1)
 
 
@@ -178,8 +154,8 @@ concrete_total_miu= interaction_Coefficient*concrete_density # 1/cm
 source1_strength= 9.44601235e+17/(((4* np.pi)*(d_source1**2)))
 source2_strength= 9.44601235e+17/(((4* np.pi)*(d_source2**2)))
 source3_strength= 9.44601235e+17/(((4* np.pi)*(d_source3**2)))
-<<<<<<< HEAD
-Source_Strength = 9.44601235e+17/(((4* np.pi)*(R*R)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
+Source_Strength = 9.44601235e+17/(((4* np.pi)*(R**2)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
+
 ################## Attenuations
 source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 1
 source2attenuation_at_R= np.exp(-(total_miu*np.abs(d_source2)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 2
@@ -188,14 +164,7 @@ cask1attenuation= np.exp(-(lead_total_miu*np.abs(d_cast1)))# LEAD ATTENUATION FR
 cask2attenuation= np.exp(-(lead_total_miu*np.abs(d_cast2)))# LEAD ATTENUATION FROM CENTER OF CASK 2
 cask3attenuation= np.exp(-(lead_total_miu*np.abs(d_cast3)))# LEAD ATTENUATION FROM CENTER OF CASK 3
 totalcaskattenuation=cask1attenuation+cask2attenuation+cask3attenuation
-=======
-Source_Strength = 9.44601235e+17/(((4* np.pi)*(R**2)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 
-
-source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))
-source2attenuation_at_R= np.exp(-(total_miu*np.abs(d_source2)))
-source3attenuation_at_R= np.exp(-(total_miu*np.abs(d_source3)))
->>>>>>> 47c06d5ac601800d85223e6aeeadca5324c4d2d1
 attenuation_at_R= np.exp(-(total_miu*np.abs(R)))
 
 ResponseFunction=np.array(1.835e-8*cesium_137[0]*interaction_Coefficient) #R/cm2, R=roentgen
