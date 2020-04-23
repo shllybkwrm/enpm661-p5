@@ -79,7 +79,7 @@ ax.autoscale_view()
 plt.xlim(0,732)
 plt.ylim(0,152)
 ##plt.show()
-air_density= 1.205e-3 # Dry air near sea level in g cm3
+argon_density= 0.001784 # Dry air near sea level in g cm3
 
 ##################### Functions for calculating source distances to every point
 #def distance_2(p1,p2):
@@ -100,9 +100,9 @@ for x in Xpts:
         d_source1[x,y] = np.linalg.norm(point-[366,76])
         d_source2[x,y] = np.linalg.norm(point-[182,76])
         d_source3[x,y] = np.linalg.norm(point-[548,76])
-print(d_source1)
-print(d_source2)
-print(d_source3)
+##print(d_source1)
+##print(d_source2)
+##print(d_source3)
 
 ##################### Function for extrapolating attenuation
 ##################### Coefficients from NIST tables
@@ -128,11 +128,11 @@ points = np.array(list(zip(X.flatten(),Y.flatten())))
 #################### For hot cell there will be multiple isotopes with different characteristic energies
 cesium_137 = np.array([0.662,8.04e-2,7.065e-2,0.6,0.8]) #mass interaction coefficient[MeV,mass interactions ( cm2/g),from Faw and Shultis,energis from Faw and Shultis]
 interaction_Coefficient= np.array([extrapolation(cesium_137)]) #cm2/g
-total_miu= interaction_Coefficient*air_density # 1/cm
+total_miu= interaction_Coefficient*argon_density # 1/cm
 
-source1_strength= 9.44601235e+17/(((4* np.pi)*(d_source1^2)))
-source2_strength= 9.44601235e+17/(((4* np.pi)*(d_source2^2)))
-source3_strength= 9.44601235e+17/(((4* np.pi)*(d_source3^2)))
+source1_strength= 9.44601235e+17/(((4* np.pi)*(d_source1**2)))
+source2_strength= 9.44601235e+17/(((4* np.pi)*(d_source2**2)))
+source3_strength= 9.44601235e+17/(((4* np.pi)*(d_source3**2)))
 Source_Strength = 9.44601235e+17/(((4* np.pi)*(R*R)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 
 
@@ -146,15 +146,16 @@ Exposure_rate=ResponseFunction*Source_Strength*attenuation_at_R # R
 Exposure_rate_source1=ResponseFunction*source1_strength*source1attenuation_at_R # R
 Exposure_rate_source2=ResponseFunction*source2_strength*source2attenuation_at_R # R
 Exposure_rate_source3=ResponseFunction*source3_strength*source3attenuation_at_R # R
+Total_Exposure=Exposure_rate_source1+Exposure_rate_source2+Exposure_rate_source3
 ##print ("Exposure_rate_source1")
 ##print (Exposure_rate_source1)
 
 ################## Westinghhouse High-level Hot Cell
 ##print(X,"X")
 ##print(Y,"Y")
-print(R,"R")
+##print(R,"R")
 print(Exposure_rate, "Exposure_rate")
-print(points)
+##print(points)
 
 ########### PLOTTING THE SOURCET################
 circle=Path.circle((75,75),radius=170,readonly=False)
