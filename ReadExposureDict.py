@@ -19,3 +19,4 @@ def ReadDict():
 if __name__ == "__main__":
     exposure_dict = ReadDict()
     print(exposure_dict)
+    

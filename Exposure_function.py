@@ -139,7 +139,13 @@ for x in Xpts:
         d_cask3[y,x] = np.linalg.norm(point - [600,100])
 ##print(d_source1)
 
-#### ADJUST CASK RADIUS HERE
+#### ADJUST CASK RADIUS - set to 0 if over 20 (radius of cask)
+threshold_indices = d_cask1 > 20
+d_cask1[threshold_indices] = 0
+threshold_indices = d_cask2 > 20
+d_cask2[threshold_indices] = 0
+threshold_indices = d_cask3 > 20
+d_cask3[threshold_indices] = 0
 
 
 #################### GammaEnergy = np.array([0.662]) # MeV, characteristic gamma for Cs 137
