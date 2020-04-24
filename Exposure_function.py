@@ -174,8 +174,8 @@ Exposure_rate_source1=ResponseFunction*source1_strength*source1attenuation_at_R 
 Exposure_rate_source2=ResponseFunction*source2_strength*source2attenuation_at_R # R
 Exposure_rate_source3=ResponseFunction*source3_strength*source3attenuation_at_R # R
 Total_Exposure=(Exposure_rate_source1+Exposure_rate_source2+Exposure_rate_source3)*totalcaskattenuation
-##print ("Exposure_rate_source1")
-##print (Exposure_rate_source1)
+print ("Total exposure")
+print (Total_Exposure)
 
 
 ################## Plotting exposure heatmaps
