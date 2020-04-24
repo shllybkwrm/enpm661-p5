@@ -215,13 +215,13 @@ im = ax1.imshow(Exposure_rate, norm=LogNorm())
 ax1.set_title('Exposure rate in log scale (scenario 1)')
 ax1.autoscale_view()
 cb = fig1.colorbar(im)
-cb.set_label("Radiation exposure (R)")
+cb.set_label("Radiation exposure rate (R/hr)")
 
 fig2, ax2 = plt.subplots()
 im = ax2.imshow(Total_Exposure, norm=LogNorm())
 ax2.set_title('Total exposure rate in log scale (scenario 2)')
 cb = fig2.colorbar(im)
-cb.set_label("Radiation exposure (R)")
+cb.set_label("Radiation exposure rate (R/hr)")
 
 ########### PLOTTING THE SOURCE ################
 #fig2, ax2 = plt.subplots()
