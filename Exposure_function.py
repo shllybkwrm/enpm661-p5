@@ -90,7 +90,7 @@ cesium_137 = np.array([0.662,8.04e-2,7.065e-2,0.6,0.8]) #mass interaction coeffi
 concrete = np.array([0.662,8.062e-2,6.083e-2, 0.6,0.8])
 lead = np.array([0.662,1.167e-1,8.408e-2, 0.6,0.8])
 
-<<<<<<< HEAD
+
 ##################### Functions for calculating source distances to every point
 #def distance_2(p1,p2):
 #    distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
@@ -119,8 +119,7 @@ for x in Xpts:
 ##print(d_source1)
 ##print(d_source2)
 ##print(d_source3)
-=======
->>>>>>> 47c06d5ac601800d85223e6aeeadca5324c4d2d1
+
 
 ##################### Function for extrapolating attenuation
 ##################### Coefficients from NIST tables
@@ -178,7 +177,7 @@ concrete_total_miu= interaction_Coefficient*concrete_density # 1/cm
 source1_strength= 9.44601235e+17/(((4* np.pi)*(d_source1**2)))
 source2_strength= 9.44601235e+17/(((4* np.pi)*(d_source2**2)))
 source3_strength= 9.44601235e+17/(((4* np.pi)*(d_source3**2)))
-<<<<<<< HEAD
+
 Source_Strength = 9.44601235e+17/(((4* np.pi)*(R*R)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 ################## Attenuations
 source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 1
@@ -188,14 +187,14 @@ cask1attenuation= np.exp(-(lead_total_miu*np.abs(d_cast1)))# LEAD ATTENUATION FR
 cask2attenuation= np.exp(-(lead_total_miu*np.abs(d_cast2)))# LEAD ATTENUATION FROM CENTER OF CASK 2
 cask3attenuation= np.exp(-(lead_total_miu*np.abs(d_cast3)))# LEAD ATTENUATION FROM CENTER OF CASK 3
 totalcaskattenuation=cask1attenuation+cask2attenuation+cask3attenuation
-=======
+
 Source_Strength = 9.44601235e+17/(((4* np.pi)*(R**2)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 
 
 source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))
 source2attenuation_at_R= np.exp(-(total_miu*np.abs(d_source2)))
 source3attenuation_at_R= np.exp(-(total_miu*np.abs(d_source3)))
->>>>>>> 47c06d5ac601800d85223e6aeeadca5324c4d2d1
+
 attenuation_at_R= np.exp(-(total_miu*np.abs(R)))
 
 ResponseFunction=np.array(1.835e-8*cesium_137[0]*interaction_Coefficient) #R/cm2, R=roentgen
