@@ -81,6 +81,7 @@ plt.xlim(0,732)
 plt.ylim(0,152)
 ##plt.show()
 
+
 ##################### Densities ######################################
 argon_density= 0.001784 # Dry air near sea level in g cm3
 lead_density = 11.36
@@ -89,36 +90,6 @@ concrete_density = 3.15
 cesium_137 = np.array([0.662,8.04e-2,7.065e-2,0.6,0.8]) #mass interaction coefficient[MeV,mass interactions ( cm2/g),from Faw and Shultis,energis from Faw and Shultis]
 concrete = np.array([0.662,8.062e-2,6.083e-2, 0.6,0.8])
 lead = np.array([0.662,1.167e-1,8.408e-2, 0.6,0.8])
-
-
-##################### Functions for calculating source distances to every point
-#def distance_2(p1,p2):
-#    distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
-#    return distance
-Xpts = range(732)
-Ypts = range(152)
-xv,yv = np.meshgrid(Xpts, Ypts, sparse=False, indexing='xy')
-#coords = np.column_stack((xv.ravel(),yv.ravel()))
-#coords = list(itertools.product(x_points, y_points))
-#print(xv)
-d_source1 = np.zeros([732,152])
-d_source2 = np.zeros([732,152])
-d_source3 = np.zeros([732,152])
-d_cast1 = np.zeros([732,152])
-d_cast2 = np.zeros([732,152])
-d_cast3 = np.zeros([732,152])
-for x in Xpts:
-    for y in Ypts:
-        point = np.array([xv[y,x], yv[y,x]])
-        d_source1[x,y] = np.linalg.norm(point-[366,76])
-        d_source2[x,y] = np.linalg.norm(point-[182,76])
-        d_source3[x,y] = np.linalg.norm(point-[548,76])
-        d_cast1[x,y] = np.linalg.norm(point-[200,100])
-        d_cast2[x,y] = np.linalg.norm(point-[400,100])
-        d_cast3[x,y] = np.linalg.norm(point-[600,100])
-##print(d_source1)
-##print(d_source2)
-##print(d_source3)
 
 
 ##################### Function for extrapolating attenuation
@@ -154,13 +125,27 @@ xv,yv = np.meshgrid(Xpts, Ypts, sparse=False, indexing='xy')
 d_source1 = np.zeros([room_width, room_length])
 d_source2 = np.zeros([room_width, room_length])
 d_source3 = np.zeros([room_width, room_length])
+d_cask1 = np.zeros([room_width, room_length])
+d_cask2 = np.zeros([room_width, room_length])
+d_cask3 = np.zeros([room_width, room_length])
 for x in Xpts:
     for y in Ypts:
         point = np.array([xv[y,x], yv[y,x]])
         d_source1[y,x] = np.linalg.norm(point - Source1_location)
         d_source2[y,x] = np.linalg.norm(point - Source2_location)
         d_source3[y,x] = np.linalg.norm(point - Source3_location)
+        d_cask1[y,x] = np.linalg.norm(point - [200,100])
+        d_cask2[y,x] = np.linalg.norm(point - [400,100])
+        d_cask3[y,x] = np.linalg.norm(point - [600,100])
 ##print(d_source1)
+
+#### ADJUST CASK RADIUS - set to 0 if over 20 (radius of cask)
+threshold_indices = d_cask1 > 20
+d_cask1[threshold_indices] = 0
+threshold_indices = d_cask2 > 20
+d_cask2[threshold_indices] = 0
+threshold_indices = d_cask3 > 20
+d_cask3[threshold_indices] = 0
 
 
 #################### GammaEnergy = np.array([0.662]) # MeV, characteristic gamma for Cs 137
@@ -177,23 +162,16 @@ concrete_total_miu= interaction_Coefficient*concrete_density # 1/cm
 source1_strength= 9.44601235e+17/(((4* np.pi)*(d_source1**2)))
 source2_strength= 9.44601235e+17/(((4* np.pi)*(d_source2**2)))
 source3_strength= 9.44601235e+17/(((4* np.pi)*(d_source3**2)))
+Source_Strength = 9.44601235e+17/(((4* np.pi)*(R**2)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 
-Source_Strength = 9.44601235e+17/(((4* np.pi)*(R*R)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 ################## Attenuations
 source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 1
 source2attenuation_at_R= np.exp(-(total_miu*np.abs(d_source2)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 2
 source3attenuation_at_R= np.exp(-(total_miu*np.abs(d_source3)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 3
-cask1attenuation= np.exp(-(lead_total_miu*np.abs(d_cast1)))# LEAD ATTENUATION FROM CENTER OF CASK 1
-cask2attenuation= np.exp(-(lead_total_miu*np.abs(d_cast2)))# LEAD ATTENUATION FROM CENTER OF CASK 2
-cask3attenuation= np.exp(-(lead_total_miu*np.abs(d_cast3)))# LEAD ATTENUATION FROM CENTER OF CASK 3
+cask1attenuation= np.exp(-(lead_total_miu*np.abs(d_cask1)))# LEAD ATTENUATION FROM CENTER OF CASK 1
+cask2attenuation= np.exp(-(lead_total_miu*np.abs(d_cask2)))# LEAD ATTENUATION FROM CENTER OF CASK 2
+cask3attenuation= np.exp(-(lead_total_miu*np.abs(d_cask3)))# LEAD ATTENUATION FROM CENTER OF CASK 3
 totalcaskattenuation=cask1attenuation+cask2attenuation+cask3attenuation
-
-Source_Strength = 9.44601235e+17/(((4* np.pi)*(R**2)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
-
-
-source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))
-source2attenuation_at_R= np.exp(-(total_miu*np.abs(d_source2)))
-source3attenuation_at_R= np.exp(-(total_miu*np.abs(d_source3)))
 
 attenuation_at_R= np.exp(-(total_miu*np.abs(R)))
 
@@ -204,8 +182,24 @@ Exposure_rate_source1=ResponseFunction*source1_strength*source1attenuation_at_R 
 Exposure_rate_source2=ResponseFunction*source2_strength*source2attenuation_at_R # R
 Exposure_rate_source3=ResponseFunction*source3_strength*source3attenuation_at_R # R
 Total_Exposure=(Exposure_rate_source1+Exposure_rate_source2+Exposure_rate_source3)*totalcaskattenuation
-##print ("Exposure_rate_source1")
-##print (Exposure_rate_source1)
+print ("\nTotal exposure")
+print (Total_Exposure)
+
+
+################## Exporting total exposure into file
+exposure_dict = {}
+# Discretize every 5cm
+Xgrid = range(0, room_length, 5)
+Ygrid = range(0, room_width, 5)
+
+for i in Xgrid:
+    for j in Ygrid:
+        exposure_dict[(i,j)] = Total_Exposure[j,i]
+
+# print(exposure_dict)
+f = open("Total_Exposure.txt", "w")
+f.write(str(exposure_dict))
+f.close()
 
 
 ################## Plotting exposure heatmaps
@@ -221,13 +215,13 @@ im = ax1.imshow(Exposure_rate, norm=LogNorm())
 ax1.set_title('Exposure rate in log scale (scenario 1)')
 ax1.autoscale_view()
 cb = fig1.colorbar(im)
-cb.set_label("Radiation exposure (R)")
+cb.set_label("Radiation exposure rate (R/hr)")
 
 fig2, ax2 = plt.subplots()
 im = ax2.imshow(Total_Exposure, norm=LogNorm())
 ax2.set_title('Total exposure rate in log scale (scenario 2)')
 cb = fig2.colorbar(im)
-cb.set_label("Radiation exposure (R)")
+cb.set_label("Radiation exposure rate (R/hr)")
 
 ########### PLOTTING THE SOURCE ################
 #fig2, ax2 = plt.subplots()
