@@ -149,9 +149,9 @@ total_miu= interaction_Coefficient*argon_density # 1/cm
 lead_total_miu= interaction_Coefficient*lead_density # 1/cm
 concrete_total_miu= interaction_Coefficient*concrete_density # 1/cm
 ################### Source Strength
-source1_strength= 9.44601235e+17/(((4* np.pi)*(d_source1**2)))
-source2_strength= 9.44601235e+17/(((4* np.pi)*(d_source2**2)))
-source3_strength= 9.44601235e+17/(((4* np.pi)*(d_source3**2)))
+source1_strength= (9.44601235e+17/3)/(((4* np.pi)*(d_source1**2)))
+source2_strength= (9.44601235e+17/6)/(((4* np.pi)*(d_source2**2)))
+source3_strength= (9.44601235e+17/2)/(((4* np.pi)*(d_source3**2)))
 Source_Strength = 9.44601235e+17/(((4* np.pi)*(R*R)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 ################## Attenuations
 source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 1
