@@ -49,13 +49,13 @@ circle=Path.circle((620,120),radius=1,readonly=False)
 source3patch=PathPatch(circle, facecolor='red', edgecolor='green')
 #################### PLOTTING DRY STORAGE CASK
 circle=Path.circle((200,100),radius=20,readonly=False)
-sourcedrycast1=PathPatch(circle, facecolor='red', edgecolor='red')
+sourcedrycast1=PathPatch(circle, facecolor='white', edgecolor='black')
 #################### PLOTTING DRY STORAGE CASK
 circle=Path.circle((400,100),radius=20,readonly=False)
-sourcedrycast2=PathPatch(circle, facecolor='red', edgecolor='green')
+sourcedrycast2=PathPatch(circle, facecolor='white', edgecolor='black')
 #################### PLOTTING DRY STORAGE CASK
 circle=Path.circle((600,100),radius=20,readonly=False)
-sourcedrycast3=PathPatch(circle, facecolor='red', edgecolor='green')
+sourcedrycast3=PathPatch(circle, facecolor='white', edgecolor='black')
 #################### TOOL BOX COORDINATE
 TB_x_coord=400  #LOCATION OF TOOL BOX center
 TB_y_coord=40  #LOCATION OF TOOL BOX center
@@ -63,7 +63,7 @@ TB_length= 200
 TB_height= 10
 TB_points, TBvertices=make(TB_x_coord,TB_y_coord,TB_length,TB_height)
 TB = Path(TBvertices,rcodes)
-TBpatch = PathPatch(TB, facecolor='green', edgecolor='green')
+TBpatch = PathPatch(TB, facecolor='purple', edgecolor='purple')
 ######PLOTTING#####################
 ##fig, ax = plt.subplots()
 ##ax.add_patch(robotpatch)
