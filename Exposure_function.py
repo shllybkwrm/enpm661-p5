@@ -21,6 +21,18 @@ multiple remote cameras with live video feed viewing monitors.
 A heavy-duty manipulator with a hoist capability of 1,000 pounds...
 """
 
+
+room_length = 732 # cm
+room_width = 152 # cm
+Source1_location = [366,76]
+Source2_location = [150,120]
+Source3_location = [620,120]
+Cask1_location = [200,100]
+Cask2_location = [400,100]
+Cask3_location = [600,100]
+Cask_rad = 20
+
+
 def make(xcoord,ycoord,length, width):
     x=np.linspace((xcoord-length/2),(xcoord+length/2),length+1,dtype=int)
     y=np.linspace((ycoord+width/2),(ycoord-width/2),width+1,dtype=int)
@@ -39,22 +51,22 @@ rcodes = [Path.MOVETO] + [Path.LINETO]*3 + [Path.CLOSEPOLY]
 robot = Path(rvertices,rcodes)
 robotpatch = PathPatch(robot, facecolor='green', edgecolor='green')
 #################### PLOTTING SOURCE 1
-circle=Path.circle((366,76),radius=1,readonly=False)
+circle=Path.circle(Source1_location, radius=1)
 source1patch=PathPatch(circle, facecolor='red', edgecolor='green')
 #################### PLOTTING SOURCE 2
-circle=Path.circle((150,120),radius=1,readonly=False)
+circle=Path.circle(Source2_location, radius=1)
 source2patch=PathPatch(circle, facecolor='red', edgecolor='green')
 #################### PLOTTING SOURCE 3
-circle=Path.circle((620,120),radius=1,readonly=False)
+circle=Path.circle(Source3_location, radius=1)
 source3patch=PathPatch(circle, facecolor='red', edgecolor='green')
-#################### PLOTTING DRY STORAGE CASK
-circle=Path.circle((200,100),radius=20,readonly=False)
+#################### PLOTTING DRY STORAGE CASK 1
+circle=Path.circle(Cask1_location, radius=Cask_rad)
 sourcedrycast1=PathPatch(circle, facecolor='white', edgecolor='black')
-#################### PLOTTING DRY STORAGE CASK
-circle=Path.circle((400,100),radius=20,readonly=False)
+#################### PLOTTING DRY STORAGE CASK 2
+circle=Path.circle(Cask2_location, radius=Cask_rad)
 sourcedrycast2=PathPatch(circle, facecolor='white', edgecolor='black')
-#################### PLOTTING DRY STORAGE CASK
-circle=Path.circle((600,100),radius=20,readonly=False)
+#################### PLOTTING DRY STORAGE CASK 3
+circle=Path.circle(Cask3_location, radius=Cask_rad)
 sourcedrycast3=PathPatch(circle, facecolor='white', edgecolor='black')
 #################### TOOL BOX COORDINATE
 TB_x_coord=400  #LOCATION OF TOOL BOX center
@@ -98,24 +110,44 @@ def extrapolation(isotope):
     y2=(k*(x2-x1))+y1
     return y2
 #################### Defining the map #########################
-room_length = 732 # cm
-room_width = 152 # cm
-Source1_location = [400,60]
-Source2_location = [150,120]
-Source3_location = [620,120]
+### Moved these to top ###
+# room_length = 732 # cm
+# room_width = 152 # cm
+# Source1_location = [400,60]
+# Source2_location = [150,120]
+# Source3_location = [620,120]
 x=np.linspace(-room_length/2,room_length/2,room_length+1)
 y=np.linspace(-room_width/2,room_width/2,room_width+1)
 X,Y = np.meshgrid(x,y, indexing='xy')
 a=np.array(((0,X),(0,Y)))
 R=np.linalg.norm(a) #The 2 norm of each point gives the distance from the center of the room
 points = np.array(list(zip(X.flatten(),Y.flatten())))
-####################### Calculate source distances to every point
+
+
+####################### Helper funcs for half-planes determined by cask-source lines
+# https://stackoverflow.com/questions/1560492/how-to-tell-whether-a-point-is-to-the-right-or-left-side-of-a-line
+#  Uses cross-product/2D determinant
+def isLeft(a, b, c):  # a,b two points on ends of line, c is new point to check
+    return ((b[0] - a[0])*(c[1] - a[1]) - (b[1] - a[1])*(c[0] - a[0])) > 0
+
+# Find parameters of lines bisecting casks
+m_1 = -1/((Source1_location[1] - Cask1_location[1])/(Source1_location[0] - Cask1_location[0]))
+b_1 = Cask1_location[1] - m_1*Cask1_location[0]  # y-intercept
+x0_1 = (0-b_1)/m_1  # x-intercept
+xmax_1 = (room_width-b_1)/m_1
+print("Source1-Cask1 line params")
+print(m_1, b_1, x0_1, xmax_1)
+ans = isLeft((x0_1,0), (xmax_1,room_width), (195,100))
+print(ans)
+
+
+####################### Calculate source & cask distances to every point
 Xpts = range(room_length)
 Ypts = range(room_width)
 xv,yv = np.meshgrid(Xpts, Ypts, sparse=False, indexing='xy')
 coords = np.column_stack((xv.ravel(),yv.ravel()))
 ##coords = list(itertools.product(x_points, y_points))
-print(xv)
+#print(xv)
 d_source1 = np.zeros([room_width, room_length])
 d_source2 = np.zeros([room_width, room_length])
 d_source3 = np.zeros([room_width, room_length])
@@ -128,25 +160,30 @@ for x in Xpts:
         d_source1[y,x] = np.linalg.norm(point - Source1_location)
         d_source2[y,x] = np.linalg.norm(point - Source2_location)
         d_source3[y,x] = np.linalg.norm(point - Source3_location)
-        d_cask1[y,x] = np.linalg.norm(point - [200,100])
-        d_cask2[y,x] = np.linalg.norm(point - [400,100])
-        d_cask3[y,x] = np.linalg.norm(point - [600,100])
+        
+        # Casks attenuate perpendicular to each source - need to add more matrices and adjust values here
+        d_cask1[y,x] = np.linalg.norm(point - Cask1_location)
+        d_cask2[y,x] = np.linalg.norm(point - Cask2_location)
+        d_cask3[y,x] = np.linalg.norm(point - Cask3_location)
+
 ##print(d_source1)
 
-###### ADJUST CASK RADIUS - set to 0 if over 20 (radius of cask)
-threshold_indices = d_cask1 > 20
+###### ADJUST CASK RADIUS - set to 0 if over 1.5x20 (radius of cask)
+threshold_indices = d_cask1 > (1.5*Cask_rad)
 d_cask1[threshold_indices] = 0
-threshold_indices = d_cask2 > 40
+threshold_indices = d_cask2 > (1.5*Cask_rad)
 d_cask2[threshold_indices] = 0
-threshold_indices = d_cask3 > 20
+threshold_indices = d_cask3 > (1.5*Cask_rad)
 d_cask3[threshold_indices] = 0
+
+
 ###################### GammaEnergy = np.array([0.662]) # MeV, characteristic gamma for Cs 137
 ###################### For hot cell there will be multiple isotopes with different characteristic energies
 #####################  0.662 Mev Interaction Coefficients
 interaction_Coefficient= np.array([extrapolation(cesium_137)]) #cm2/g
 concrete_interaction_Coefficient= np.array([extrapolation(concrete)]) #cm2/g
 lead_interaction_Coefficient= np.array([extrapolation(lead)]) #cm2/g
-##################### Total Mui
+##################### Total Miu
 total_miu= interaction_Coefficient*argon_density # 1/cm
 lead_total_miu= interaction_Coefficient*lead_density # 1/cm
 concrete_total_miu= interaction_Coefficient*concrete_density # 1/cm
@@ -202,20 +239,21 @@ r = np.ptp(Exposure_rate,axis=1)
 #print (Exposure_rate.shape)
 #print("Exposure_rate ranges", r)
 
-fig1, ax1 = plt.subplots()
-#im = ax1.imshow(Exposure_rate)
-#im = ax1.matshow(Exposure_rate, cmap=cm.gray_r, norm=LogNorm(vmin=0.01, vmax=1))
-im = ax1.imshow(Exposure_rate, norm=LogNorm())
-ax1.set_title('Exposure rate in log scale (scenario 1)')
-ax1.autoscale_view()
-cb = fig1.colorbar(im)
-cb.set_label("Radiation exposure rate (R/hr)")
+# fig1, ax1 = plt.subplots()
+# #im = ax1.imshow(Exposure_rate)
+# #im = ax1.matshow(Exposure_rate, cmap=cm.gray_r, norm=LogNorm(vmin=0.01, vmax=1))
+# im = ax1.imshow(Exposure_rate, norm=LogNorm())
+# ax1.set_title('Exposure rate in log scale (scenario 1)')
+# ax1.autoscale_view()
+# cb = fig1.colorbar(im)
+# cb.set_label("Exposure rate (R/hr)")
+
 
 fig2, ax2 = plt.subplots()
 im = ax2.imshow(Total_Exposure, norm=LogNorm())
 ax2.set_title('Total exposure rate in log scale (scenario 2)')
 cb = fig2.colorbar(im)
-cb.set_label("Radiation exposure rate (R/hr)")
+cb.set_label("Exposure rate (R/hr)")
 ax2.add_patch(robotpatch)
 ax2.add_patch(TBpatch)
 ax2.add_patch(source1patch)
@@ -238,8 +276,8 @@ plt.ylim(0,152)
 #ax2.autoscale_view()
 #plt.xlim(0,300)
 #plt.ylim(0,200)
-fig3, ax3 = plt.subplots()
-ax3.plot(EX)
-plt.xlim(0,732)
-plt.ylim(0,152)
-plt.show()
+# fig3, ax3 = plt.subplots()
+# ax3.plot(EX)
+# plt.xlim(0,732)
+# plt.ylim(0,152)
+# plt.show()
