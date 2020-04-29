@@ -24,8 +24,9 @@ A heavy-duty manipulator with a hoist capability of 1,000 pounds...
 
 room_length = 732 # cm
 room_width = 152 # cm
-Source1_location = [366,76]
-Source2_location = [150,120]
+# Reordered left to right
+Source1_location = [150,120]
+Source2_location = [366,76]
 Source3_location = [620,120]
 Cask1_location = [200,100]
 Cask2_location = [400,100]
@@ -61,13 +62,13 @@ circle=Path.circle(Source3_location, radius=1)
 source3patch=PathPatch(circle, facecolor='red', edgecolor='green')
 #################### PLOTTING DRY STORAGE CASK 1
 circle=Path.circle(Cask1_location, radius=Cask_rad)
-sourcedrycast1=PathPatch(circle, facecolor='white', edgecolor='black')
+sourcedrycast1=PathPatch(circle, facecolor='white', edgecolor='none')
 #################### PLOTTING DRY STORAGE CASK 2
 circle=Path.circle(Cask2_location, radius=Cask_rad)
-sourcedrycast2=PathPatch(circle, facecolor='white', edgecolor='black')
+sourcedrycast2=PathPatch(circle, facecolor='white', edgecolor='none')
 #################### PLOTTING DRY STORAGE CASK 3
 circle=Path.circle(Cask3_location, radius=Cask_rad)
-sourcedrycast3=PathPatch(circle, facecolor='white', edgecolor='black')
+sourcedrycast3=PathPatch(circle, facecolor='white', edgecolor='none')
 #################### TOOL BOX COORDINATE
 TB_x_coord=400  #LOCATION OF TOOL BOX center
 TB_y_coord=40  #LOCATION OF TOOL BOX center
@@ -76,7 +77,8 @@ TB_height= 10
 TB_points, TBvertices=make(TB_x_coord,TB_y_coord,TB_length,TB_height)
 TB = Path(TBvertices,rcodes)
 TBpatch = PathPatch(TB, facecolor='purple', edgecolor='purple')
-######PLOTTING#####################
+
+###### PLOTTING #####################
 ##fig, ax = plt.subplots()
 ##ax.add_patch(robotpatch)
 ##ax.add_patch(TBpatch)
@@ -130,15 +132,44 @@ points = np.array(list(zip(X.flatten(),Y.flatten())))
 def isLeft(a, b, c):  # a,b two points on ends of line, c is new point to check
     return ((b[0] - a[0])*(c[1] - a[1]) - (b[1] - a[1])*(c[0] - a[0])) > 0
 
-# Find parameters of lines bisecting casks
-m_1 = -1/((Source1_location[1] - Cask1_location[1])/(Source1_location[0] - Cask1_location[0]))
-b_1 = Cask1_location[1] - m_1*Cask1_location[0]  # y-intercept
+### Find parameters of lines bisecting casks
+# Source 1 - Cask 1
+# perpendicular slope = -1/m
+m_1 = -1/((Source1_location[1] - Cask1_location[1]) / (Source1_location[0] - Cask1_location[0]))
+b_1 = Cask1_location[1] - m_1*Cask1_location[0]  # y-intercept b=y-mx
 x0_1 = (0-b_1)/m_1  # x-intercept
 xmax_1 = (room_width-b_1)/m_1
 print("Source1-Cask1 line params")
 print(m_1, b_1, x0_1, xmax_1)
-ans = isLeft((x0_1,0), (xmax_1,room_width), (195,100))
+a_1 = (x0_1,0)  # left
+b_1 = (xmax_1,room_width)  # right
+ans = isLeft(a_1, b_1, (300,100))
 print(ans)
+
+# Source 2 - Cask 2
+m_2 = -1/((Source2_location[1] - Cask2_location[1]) / (Source2_location[0] - Cask2_location[0]))
+b_2 = Cask2_location[1] - m_2*Cask2_location[0]  # y-intercept
+x0_2 = (0-b_2)/m_2  # x-intercept
+xmax_2 = (room_width-b_2)/m_2
+print("Source2-Cask2 line params")
+print(m_2, b_2, x0_2, xmax_2)
+a_2 = (x0_2,0)  # right
+b_2 = (xmax_2,room_width)  # left
+ans = isLeft(a_2, b_2, (300,100))
+print(ans)
+
+# Source 3 - Cask 3
+m_3 = -1/((Source3_location[1] - Cask3_location[1]) / (Source3_location[0] - Cask3_location[0]))
+b_3 = Cask3_location[1] - m_3*Cask3_location[0]  # y-intercept
+x0_3 = (0-b_3)/m_3  # x-intercept
+xmax_3 = (room_width-b_3)/m_3
+print("Source2-Cask2 line params")
+print(m_3, b_3, x0_3, xmax_3)
+a_3 = (x0_3,0)  # right
+b_3 = (xmax_3,room_width)  # left
+ans = isLeft(a_3, b_3, (300,100))
+print(ans)
+
 
 
 ####################### Calculate source & cask distances to every point
@@ -161,14 +192,19 @@ for x in Xpts:
         d_source2[y,x] = np.linalg.norm(point - Source2_location)
         d_source3[y,x] = np.linalg.norm(point - Source3_location)
         
-        # Casks attenuate perpendicular to each source - need to add more matrices and adjust values here
-        d_cask1[y,x] = np.linalg.norm(point - Cask1_location)
-        d_cask2[y,x] = np.linalg.norm(point - Cask2_location)
-        d_cask3[y,x] = np.linalg.norm(point - Cask3_location)
+        # Casks attenuate perpendicular to each source - still need to add more matrices 
+        if not isLeft(a_1, b_1, (x,y)):
+            d_cask1[y,x] = np.linalg.norm(point - Cask1_location)
+        if not isLeft(a_2, b_2, (x,y)):
+            d_cask2[y,x] = np.linalg.norm(point - Cask2_location)
+        if isLeft(a_3, b_3, (x,y)):
+            d_cask3[y,x] = np.linalg.norm(point - Cask3_location)
 
 ##print(d_source1)
 
-###### ADJUST CASK RADIUS - set to 0 if over 1.5x20 (radius of cask)
+###### ADJUST CASK DISTANCES
+# Set to 0 if over 1.5x20 (radius of cask)
+# Points on source side of cask should already be 0
 threshold_indices = d_cask1 > (1.5*Cask_rad)
 d_cask1[threshold_indices] = 0
 threshold_indices = d_cask2 > (1.5*Cask_rad)
@@ -208,6 +244,7 @@ attenuation_at_R= np.exp(-(total_miu*np.abs(R)))
 ##
 ResponseFunction=np.array(1.835e-8*cesium_137[0]*interaction_Coefficient) #R/cm2, R=roentgen
 Exposure_rate=ResponseFunction*Source_Strength*attenuation_at_R # R
+##
 Exposure_rate_source1=ResponseFunction*source1_strength*source1attenuation_at_R # R
 Exposure_rate_source2=ResponseFunction*source2_strength*source2attenuation_at_R # R
 Exposure_rate_source3=ResponseFunction*source3_strength*source3attenuation_at_R # R
@@ -235,8 +272,8 @@ f.close()
 
 ################## Plotting exposure heatmaps
 #print("Exposure_rate: ", Exposure_rate)
-r = np.ptp(Exposure_rate,axis=1)
 #print (Exposure_rate.shape)
+r = np.ptp(Exposure_rate,axis=1)
 #print("Exposure_rate ranges", r)
 
 # fig1, ax1 = plt.subplots()
