@@ -205,11 +205,11 @@ for x in Xpts:
 ###### ADJUST CASK DISTANCES
 # Set to 0 if over 1.5x20 (radius of cask)
 # Points on source side of cask should already be 0
-threshold_indices = d_cask1 > (1.5*Cask_rad)
+threshold_indices = d_cask1 > (1.5*Cask_rad*2)
 d_cask1[threshold_indices] = 0
-threshold_indices = d_cask2 > (1.5*Cask_rad)
+threshold_indices = d_cask2 > (1.5*Cask_rad*2)
 d_cask2[threshold_indices] = 0
-threshold_indices = d_cask3 > (1.5*Cask_rad)
+threshold_indices = d_cask3 > (1.5*Cask_rad*2)
 d_cask3[threshold_indices] = 0
 
 
