@@ -1,10 +1,10 @@
-from pylab import *
+#from pylab import *
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import numpy as np
-import itertools
+#import itertools
 
 """
 The high-level cell was initially designed and constructed
@@ -126,49 +126,73 @@ R=np.linalg.norm(a) #The 2 norm of each point gives the distance from the center
 points = np.array(list(zip(X.flatten(),Y.flatten())))
 
 
-####################### Helper funcs for half-planes determined by cask-source lines
+####################### Helper funcs for half-planes determined by cask-source perpendicular lines
 # https://stackoverflow.com/questions/1560492/how-to-tell-whether-a-point-is-to-the-right-or-left-side-of-a-line
 #  Uses cross-product/2D determinant
 def isLeft(a, b, c):  # a,b two points on ends of line, c is new point to check
     return ((b[0] - a[0])*(c[1] - a[1]) - (b[1] - a[1])*(c[0] - a[0])) > 0
 
+def findLinePts(Cask_loc, Source_loc):
+    # perpendicular slope = -1/m
+    m = (-1)/((Source_loc[1] - Cask_loc[1]) / (Source_loc[0] - Cask_loc[0]))
+    b = Cask_loc[1] - m*Cask_loc[0]  # y-intercept: b=y-mx using cask center
+    x0 = (0-b)/m  # x-intercept: x=(y-b)/m
+    xmax = (room_width-b)/m
+    print(m, b, x0, xmax)
+    a = (x0,0)
+    b = (xmax,room_width)
+    return a,b
+
 ### Find parameters of lines bisecting casks
-# Source 1 - Cask 1
-# perpendicular slope = -1/m
-m_1 = -1/((Source1_location[1] - Cask1_location[1]) / (Source1_location[0] - Cask1_location[0]))
-b_1 = Cask1_location[1] - m_1*Cask1_location[0]  # y-intercept b=y-mx
-x0_1 = (0-b_1)/m_1  # x-intercept
-xmax_1 = (room_width-b_1)/m_1
-print("Source1-Cask1 line params")
-print(m_1, b_1, x0_1, xmax_1)
-a_1 = (x0_1,0)  # left
-b_1 = (xmax_1,room_width)  # right
-ans = isLeft(a_1, b_1, (300,100))
+# Cask 1
+print("Cask1-Source1 line params")
+a_c1s1, b_c1s1 = findLinePts(Cask1_location, Source1_location)
+ans = isLeft(a_c1s1, b_c1s1, (300,100))
 print(ans)
 
-# Source 2 - Cask 2
-m_2 = -1/((Source2_location[1] - Cask2_location[1]) / (Source2_location[0] - Cask2_location[0]))
-b_2 = Cask2_location[1] - m_2*Cask2_location[0]  # y-intercept
-x0_2 = (0-b_2)/m_2  # x-intercept
-xmax_2 = (room_width-b_2)/m_2
-print("Source2-Cask2 line params")
-print(m_2, b_2, x0_2, xmax_2)
-a_2 = (x0_2,0)  # right
-b_2 = (xmax_2,room_width)  # left
-ans = isLeft(a_2, b_2, (300,100))
+print("Cask1-Source2 line params")
+a_c1s2, b_c1s2 = findLinePts(Cask1_location, Source2_location)
+ans = isLeft(a_c1s2, b_c1s2, (300,100))
 print(ans)
 
-# Source 3 - Cask 3
-m_3 = -1/((Source3_location[1] - Cask3_location[1]) / (Source3_location[0] - Cask3_location[0]))
-b_3 = Cask3_location[1] - m_3*Cask3_location[0]  # y-intercept
-x0_3 = (0-b_3)/m_3  # x-intercept
-xmax_3 = (room_width-b_3)/m_3
-print("Source2-Cask2 line params")
-print(m_3, b_3, x0_3, xmax_3)
-a_3 = (x0_3,0)  # right
-b_3 = (xmax_3,room_width)  # left
-ans = isLeft(a_3, b_3, (300,100))
+print("Cask1-Source3 line params")
+a_c1s3, b_c1s3 = findLinePts(Cask1_location, Source3_location)
+ans = isLeft(a_c1s3, b_c1s3, (300,100))
+print(ans, '\n')
+
+
+# Cask 2 
+print("Cask2-Source1 line params")
+a_c2s1, b_c2s1 = findLinePts(Cask2_location, Source1_location)
+ans = isLeft(a_c2s1, b_c2s1, (300,100))
 print(ans)
+
+print("Cask2-Source2 line params")
+a_c2s2, b_c2s2 = findLinePts(Cask2_location, Source2_location)
+ans = isLeft(a_c2s2, b_c2s2, (300,100))
+print(ans)
+
+print("Cask2-Source3 line params")
+a_c2s3, b_c2s3 = findLinePts(Cask2_location, Source3_location)
+ans = isLeft(a_c2s3, b_c2s3, (300,100))
+print(ans, '\n')
+
+
+# Cask 3 
+print("Cask3-Source1 line params")
+a_c3s1, b_c3s1 = findLinePts(Cask3_location, Source1_location)
+ans = isLeft(a_c3s1, b_c3s1, (300,100))
+print(ans)
+
+print("Cask3-Source2 line params")
+a_c3s2, b_c3s2 = findLinePts(Cask3_location, Source2_location)
+ans = isLeft(a_c3s2, b_c3s2, (300,100))
+print(ans)
+
+print("Cask3-Source3 line params")
+a_c3s3, b_c3s3 = findLinePts(Cask3_location, Source3_location)
+ans = isLeft(a_c3s3, b_c3s3, (300,100))
+print(ans, '\n')
 
 
 
@@ -179,12 +203,23 @@ xv,yv = np.meshgrid(Xpts, Ypts, sparse=False, indexing='xy')
 coords = np.column_stack((xv.ravel(),yv.ravel()))
 ##coords = list(itertools.product(x_points, y_points))
 #print(xv)
+
 d_source1 = np.zeros([room_width, room_length])
 d_source2 = np.zeros([room_width, room_length])
 d_source3 = np.zeros([room_width, room_length])
-d_cask1 = np.zeros([room_width, room_length])
-d_cask2 = np.zeros([room_width, room_length])
-d_cask3 = np.zeros([room_width, room_length])
+
+d_cask1s1 = np.zeros([room_width, room_length])
+d_cask1s2 = np.zeros([room_width, room_length])
+d_cask1s3 = np.zeros([room_width, room_length])
+
+d_cask2s1 = np.zeros([room_width, room_length])
+d_cask2s2 = np.zeros([room_width, room_length])
+d_cask2s3 = np.zeros([room_width, room_length])
+
+d_cask3s1 = np.zeros([room_width, room_length])
+d_cask3s2 = np.zeros([room_width, room_length])
+d_cask3s3 = np.zeros([room_width, room_length])
+
 for x in Xpts:
     for y in Ypts:
         point = np.array([xv[y,x], yv[y,x]])
@@ -192,25 +227,52 @@ for x in Xpts:
         d_source2[y,x] = np.linalg.norm(point - Source2_location)
         d_source3[y,x] = np.linalg.norm(point - Source3_location)
         
-        # Casks attenuate perpendicular to each source - still need to add more matrices 
-        if not isLeft(a_1, b_1, (x,y)):
-            d_cask1[y,x] = np.linalg.norm(point - Cask1_location)
-        if not isLeft(a_2, b_2, (x,y)):
-            d_cask2[y,x] = np.linalg.norm(point - Cask2_location)
-        if isLeft(a_3, b_3, (x,y)):
-            d_cask3[y,x] = np.linalg.norm(point - Cask3_location)
+        # Casks attenuate away from each source 
+        # Cask 1 
+        if not isLeft(a_c1s1, b_c1s1, (x,y)):  # Source 1 
+            d_cask1s1[y,x] = np.linalg.norm(point - Cask1_location)
+        if     isLeft(a_c1s2, b_c1s2, (x,y)):  # Source 2 
+            d_cask1s2[y,x] = np.linalg.norm(point - Cask1_location)
+        if     isLeft(a_c1s3, b_c1s3, (x,y)):  # Source 3
+            d_cask1s3[y,x] = np.linalg.norm(point - Cask1_location)
+        
+        # Cask 2
+        if not isLeft(a_c2s1, b_c2s1, (x,y)):  # Source 1
+            d_cask2s1[y,x] = np.linalg.norm(point - Cask2_location)
+        if not isLeft(a_c2s2, b_c2s2, (x,y)):  # Source 2
+            d_cask2s2[y,x] = np.linalg.norm(point - Cask2_location)
+        if     isLeft(a_c2s3, b_c2s3, (x,y)):  # Source 3
+            d_cask2s3[y,x] = np.linalg.norm(point - Cask2_location)
+        
+        # Cask 3
+        if not isLeft(a_c3s1, b_c3s1, (x,y)):  # Source 1
+            d_cask3s1[y,x] = np.linalg.norm(point - Cask3_location)
+        if not isLeft(a_c3s2, b_c3s2, (x,y)):  # Source 2
+            d_cask3s2[y,x] = np.linalg.norm(point - Cask3_location)
+        if     isLeft(a_c3s3, b_c3s3, (x,y)):  # Source3
+            d_cask3s3[y,x] = np.linalg.norm(point - Cask3_location)
 
 ##print(d_source1)
 
 ###### ADJUST CASK DISTANCES
 # Set to 0 if over 1.5x20 (radius of cask)
 # Points on source side of cask should already be 0
-threshold_indices = d_cask1 > (1.5*Cask_rad*2)
-d_cask1[threshold_indices] = 0
-threshold_indices = d_cask2 > (1.5*Cask_rad*2)
-d_cask2[threshold_indices] = 0
-threshold_indices = d_cask3 > (1.5*Cask_rad*2)
-d_cask3[threshold_indices] = 0
+def threshold(d_cask):
+    threshold_indices = d_cask > (1.5*Cask_rad*2)
+    d_cask[threshold_indices] = 0
+    return d_cask
+
+d_cask1s1 = threshold(d_cask1s1)
+d_cask1s2 = threshold(d_cask1s2)
+d_cask1s3 = threshold(d_cask1s3)
+
+d_cask2s1 = threshold(d_cask2s1)
+d_cask2s2 = threshold(d_cask2s2)
+d_cask2s3 = threshold(d_cask2s3)
+
+d_cask3s1 = threshold(d_cask3s1)
+d_cask3s2 = threshold(d_cask3s2)
+d_cask3s3 = threshold(d_cask3s3)
 
 
 ###################### GammaEnergy = np.array([0.662]) # MeV, characteristic gamma for Cs 137
@@ -232,12 +294,17 @@ source3_strength= (9.44601235e+14/2)/(((4* np.pi)*(d_source3**2)))
 Source_Strength = 9.44601235e+17/(((4* np.pi)*(R**2)))# particles/cm2 isotropic source emmiting 1e24 particles at origin
 ##
 #################### Attenuations
-source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 1
-source2attenuation_at_R= np.exp(-(total_miu*np.abs(d_source2)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 2
-source3attenuation_at_R= np.exp(-(total_miu*np.abs(d_source3)))# ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 3
-cask1attenuation= np.exp(-(lead_total_miu*np.abs(d_cask1)))# LEAD ATTENUATION FROM CENTER OF CASK 1
-cask2attenuation= np.exp(-(lead_total_miu*np.abs(d_cask2)))# LEAD ATTENUATION FROM CENTER OF CASK 2
-cask3attenuation= np.exp(-(lead_total_miu*np.abs(d_cask3)))# LEAD ATTENUATION FROM CENTER OF CASK 3
+source1attenuation_at_R= np.exp(-(total_miu*np.abs(d_source1)))  # ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 1
+source2attenuation_at_R= np.exp(-(total_miu*np.abs(d_source2)))  # ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 2
+source3attenuation_at_R= np.exp(-(total_miu*np.abs(d_source3)))  # ARGON ATTENUATION AT ALL POINTS IN THE ROOM FOR SOURCE 3
+
+# LEAD ATTENUATION FROM CENTER OF CASK 1
+cask1attenuation= np.exp(-(lead_total_miu*np.abs(d_cask1s1))) + np.exp(-(lead_total_miu*np.abs(d_cask1s2))) + np.exp(-(lead_total_miu*np.abs(d_cask1s3)))  
+# LEAD ATTENUATION FROM CENTER OF CASK 2
+cask2attenuation= np.exp(-(lead_total_miu*np.abs(d_cask2s1))) + np.exp(-(lead_total_miu*np.abs(d_cask2s2))) + np.exp(-(lead_total_miu*np.abs(d_cask2s3)))  
+# LEAD ATTENUATION FROM CENTER OF CASK 3
+cask3attenuation= np.exp(-(lead_total_miu*np.abs(d_cask3s1))) + np.exp(-(lead_total_miu*np.abs(d_cask3s2))) + np.exp(-(lead_total_miu*np.abs(d_cask3s3)))  
+
 totalcaskattenuation=cask1attenuation+cask2attenuation+cask3attenuation
 ##
 attenuation_at_R= np.exp(-(total_miu*np.abs(R)))
@@ -248,12 +315,13 @@ Exposure_rate=ResponseFunction*Source_Strength*attenuation_at_R # R
 Exposure_rate_source1=ResponseFunction*source1_strength*source1attenuation_at_R # R
 Exposure_rate_source2=ResponseFunction*source2_strength*source2attenuation_at_R # R
 Exposure_rate_source3=ResponseFunction*source3_strength*source3attenuation_at_R # R
+
 Total_Exposure=(Exposure_rate_source1+Exposure_rate_source2+Exposure_rate_source3)*totalcaskattenuation
 EX=np.ma.array(Total_Exposure)
 ##print ("\nTotal exposure")
 ##print (Total_Exposure)
-##
-##
+
+
 #################### Exporting total exposure into file
 exposure_dict = {}
 # Discretize every 5cm
@@ -300,8 +368,8 @@ ax2.add_patch(sourcedrycast1)
 ax2.add_patch(sourcedrycast2)
 ax2.add_patch(sourcedrycast3)
 ax2.autoscale_view()
-plt.xlim(0,732)
-plt.ylim(0,152)
+plt.xlim(0,room_length)
+plt.ylim(0,room_width)
 ##plt.plot(ax2)
 ##plt.plot(ax)
 ########### PLOTTING THE SOURCE ################
@@ -315,6 +383,6 @@ plt.ylim(0,152)
 #plt.ylim(0,200)
 # fig3, ax3 = plt.subplots()
 # ax3.plot(EX)
-# plt.xlim(0,732)
-# plt.ylim(0,152)
+# plt.xlim(0,room_length)
+# plt.ylim(0,room_width)
 # plt.show()
