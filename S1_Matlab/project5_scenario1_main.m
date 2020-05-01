@@ -1,10 +1,10 @@
-
+%%
 % Chris Wheatley 
 % ENPM661 Spring 2020
 % Project #5 
 
 close all; 
-clear all;
+clear;
 
 % % Solicit input node configuration from user
 % fprintf('\n');
@@ -50,14 +50,16 @@ yl = [ymin ymax];
 air_density = 1205; % Dry air near sea level in g/m^3
 concrete_density = 3150000; % Density of concrete in g/m^3
 steel_density = 7190000; % Density of steel in g/m^3
+global x_source y_source
 x_source=430;
 y_source=222;
 
 
-%%%%%%%%%%%%%%%%%%%%%%% START of LU's EDITS %%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%%%%%%%% START of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%%%%%%
+global map_height map_width X Y
 map_height=232; %m
 map_width=450; %m
-[X,Y]=meshgrid([1:1:map_width],[1:1:map_height]);
+[X,Y]=meshgrid([1:1:map_width],[1:1:map_height]); %#ok<NBRAK>
 X=flip(X);
 Y=flip(Y);
 
@@ -89,9 +91,9 @@ h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','white','LineWidth'
 h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','white','LineWidth',3);
 h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'LineStyle','--');
 
-cesium_137=[0.662,8.04e-6,7.065e-6,0.6,0.8];
-concrete = [0.662,8.062e-6,6.083e-6, 0.6,0.8];
-steel=[0.323,2.875e-6,2.953e-6,0.3,0.4];   % <-----NEED TO CHANGE THIS
+cesium_137=[0.662,8.04e-6,  7.065e-6, 0.6,0.8];
+concrete  =[0.662,8.062e-6, 6.083e-6, 0.6,0.8];
+steel     =[0.323,2.875e-6, 2.953e-6, 0.3,0.4];   % <-----NEED TO CHANGE THIS
 interaction_coefficient=extrapolation(cesium_137);
 interaction_coefficient_concrete=extrapolation(concrete);
 interaction_coefficient_steel=extrapolation(steel);
@@ -112,11 +114,11 @@ for rows=1:1:map_height
         R8(rows,cols)=sqrt(((Y(rows,cols)-y8)^2)+((X(rows,cols)-x8)^2));
         R9(rows,cols)=sqrt(((Y(rows,cols)-y9)^2)+((X(rows,cols)-x9)^2));
         R10(rows,cols)=sqrt(((Y(rows,cols)-y10)^2)+((X(rows,cols)-x10)^2));
-        
         R11(rows,cols)=sqrt(((Y(rows,cols)-y11)^2)+((X(rows,cols)-x11)^2));
         R12(rows,cols)=sqrt(((Y(rows,cols)-y12)^2)+((X(rows,cols)-x12)^2));
     end
 end
+
 
 dist1=sqrt(((h1.XData-x1).^2)+((h1.YData-y1).^2));
 dist2=sqrt(((h2.XData-x2).^2)+((h2.YData-y2).^2));
@@ -129,7 +131,48 @@ dist8=sqrt(((h8.XData-x8).^2)+((h8.YData-y8).^2));
 dist9=sqrt(((h9.XData-x9).^2)+((h9.YData-y9).^2));
 dist10=sqrt(((h10.XData-x10).^2)+((h10.YData-y10).^2));
 dist11=sqrt(((h11.XData-x11).^2)+((h11.YData-y11).^2));
-dist12=sqrt(((h12.XData-x12).^2)+((h12.YData-y12).^2));
+%dist12=sqrt(((h12.XData-x12).^2)+((h12.YData-y12).^2));
+
+
+[a1,b1] = findLinePts(x1,y1);
+[a2,b2] = findLinePts(x2,y2);
+[a3,b3] = findLinePts(x3,y3);
+[a4,b4] = findLinePts(x4,y4);
+[a5,b5] = findLinePts(x5,y5);
+[a6,b6] = findLinePts(x6,y6);
+[a7,b7] = findLinePts(x7,y7);
+[a8,b8] = findLinePts(x8,y8);
+[a9,b9] = findLinePts(x9,y9);
+[a10,b10] = findLinePts(x10,y10);
+[a11,b11] = findLinePts(x11,y11);
+%[a12,b12] = findLinePts(x12,y12);
+
+isLeft1 = isLeft(a1,b1);
+isLeft2 = isLeft(a2,b2);
+isLeft3 = isLeft(a3,b3);
+isLeft4 = isLeft(a4,b4);
+isLeft5 = isLeft(a5,b5);
+isLeft6 = isLeft(a6,b6);
+isLeft7 = isLeft(a7,b7);
+isLeft8 = isLeft(a8,b8);
+isLeft9 = isLeft(a9,b9);
+isLeft10 = isLeft(a10,b10);
+isLeft11 = isLeft(a11,b11);
+%isLeft12 = isLeft(a12,b12);
+
+R1(isLeft1==0)=0;
+R2(isLeft2==0)=0;
+R3(isLeft3==0)=0;
+R4(isLeft4==0)=0;
+R5(isLeft5==0)=0;
+R6(isLeft6==0)=0;
+R7(isLeft7==0)=0;
+R8(isLeft8==0)=0;
+R9(isLeft9==0)=0;
+R10(isLeft10==0)=0;
+R11(isLeft11==0)=0;
+%R12(isLeft12==0)=0;
+
 R1(R1>max(dist1))=0;
 R2(R2>max(dist2))=0;
 R3(R3>max(dist3))=0;
@@ -184,7 +227,8 @@ Exposure_steel_2=response_function_steel_1.*source_strength_steel_2.*attenuation
 %Exposure=Exposure2+Exposure_steel_2;
 Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10+attenuation_at_R11;
 
-%%%%%%%%%%%%%%%%%%%%% END of LU's EDITS %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
+%% 
 
 
 Exposure_tmp=Exposure;
@@ -274,6 +318,8 @@ if or(goalInObstacle==1,or(or(goal_node(1)>xmax,goal_node(1)<xmin),or(goal_node(
         outside_obs_goal = obstacleCheckRigid(Obstacles,goal_node,r,c);
     end
 end
+
+%% 
 
 % Start program run timer
 tic
