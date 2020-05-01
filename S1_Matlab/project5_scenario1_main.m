@@ -4,7 +4,7 @@
 % Project #5 
 
 close all; 
-clear;
+clear all;
 
 % % Solicit input node configuration from user
 % fprintf('\n');
@@ -63,21 +63,7 @@ map_width=450; %m
 X=flip(X);
 Y=flip(Y);
 
-% Find x,y centroid of each obstacle
-[x1,y1]=calc_polygon_center([15 15 36 36 56 56 15],[108 168 168 130 130 108 108]);
-[x2,y2]=calc_polygon_center([40 40 96 96 40],[192 216 216 192 192]);
-[x3,y3]=calc_polygon_center([89 89 112 112 89],[87 112 112 87 87]);
-[x4,y4]=calc_polygon_center([77 77 99 99 122 122 145 145 77],[140 183 183 168 168 183 183 140 140]);
-[x5,y5]=calc_polygon_center([93 93 190 190 93],[5 53 53 5 5]);
-[x6,y6]=calc_polygon_center([154 154 225 225 154],[144 200 200 144 144]);
-[x7,y7]=calc_polygon_center([350 350 426 426 350],[60 101 101 60 60]);
-[x8,y8]=calc_polygon_center([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36]);
-[x9,y9]=calc_polygon_center([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139]);
-[x10,y10]=calc_polygon_center([358 358 439 439 358],[127 204 204 127 127]);
-[x11,y11]=calc_polygon_center([53 39 55 77 66 53],[4 23 37 14 4 4]);
-x11=round(x11); y11=round(y11);
-[x12,y12]=calc_polygon_center([251 251 312 312 251],[51 113 91 41 51]);
-
+% Define vertices of every obstacle
 h1=line([15 15 36 36 56 56 15],[108 168 168 130 130 108 108],'Color','white','LineWidth',3);
 h2=line([40 40 96 96 40],[192 216 216 192 192],'Color','white','LineWidth',3);
 h3=line([89 89 112 112 89],[87 112 112 87 87],'Color','white','LineWidth',3);
@@ -91,6 +77,35 @@ h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','white','LineWidth'
 h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','white','LineWidth',3);
 h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'LineStyle','--');
 
+% Find x,y centroid of each obstacle
+[x1,y1]=calc_polygon_center(h1.XData,h1.YData);
+[x2,y2]=calc_polygon_center(h2.XData,h2.YData);
+[x3,y3]=calc_polygon_center(h3.XData,h3.YData);
+[x4,y4]=calc_polygon_center(h4.XData,h4.YData);
+[x5,y5]=calc_polygon_center(h5.XData,h5.YData);
+[x6,y6]=calc_polygon_center(h6.XData,h6.YData);
+[x7,y7]=calc_polygon_center(h7.XData,h7.YData);
+[x8,y8]=calc_polygon_center(h8.XData,h8.YData);
+[x9,y9]=calc_polygon_center(h9.XData,h9.YData);
+[x10,y10]=calc_polygon_center(h10.XData,h10.YData);
+[x11,y11]=calc_polygon_center(h11.XData,h11.YData);
+%x11=round(x11); y11=round(y11);
+[x12,y12]=calc_polygon_center(h12.XData,h12.YData);
+
+% Find distances from every vertex to center
+dist1=sqrt(((h1.XData-x1).^2)+((h1.YData-y1).^2));
+dist2=sqrt(((h2.XData-x2).^2)+((h2.YData-y2).^2));
+dist3=sqrt(((h3.XData-x3).^2)+((h3.YData-y3).^2));
+dist4=sqrt(((h4.XData-x4).^2)+((h4.YData-y4).^2));
+dist5=sqrt(((h5.XData-x5).^2)+((h5.YData-y5).^2));
+dist6=sqrt(((h6.XData-x6).^2)+((h6.YData-y6).^2));
+dist7=sqrt(((h7.XData-x7).^2)+((h7.YData-y7).^2));
+dist8=sqrt(((h8.XData-x8).^2)+((h8.YData-y8).^2));
+dist9=sqrt(((h9.XData-x9).^2)+((h9.YData-y9).^2));
+dist10=sqrt(((h10.XData-x10).^2)+((h10.YData-y10).^2));
+dist11=sqrt(((h11.XData-x11).^2)+((h11.YData-y11).^2));
+%dist12=sqrt(((h12.XData-x12).^2)+((h12.YData-y12).^2));
+
 cesium_137=[0.662,8.04e-6,  7.065e-6, 0.6,0.8];
 concrete  =[0.662,8.062e-6, 6.083e-6, 0.6,0.8];
 steel     =[0.323,2.875e-6, 2.953e-6, 0.3,0.4];   % <-----NEED TO CHANGE THIS
@@ -100,6 +115,20 @@ interaction_coefficient_steel=extrapolation(steel);
 total_miu= interaction_coefficient*air_density; % 1/m
 total_miu_concrete= interaction_coefficient_concrete*concrete_density; % 1/m
 total_miu_steel=interaction_coefficient_steel*steel_density;
+
+R=zeros(map_height, map_width);
+R1=zeros(map_height, map_width);
+R2=zeros(map_height, map_width);
+R3=zeros(map_height, map_width);
+R4=zeros(map_height, map_width);
+R5=zeros(map_height, map_width);
+R6=zeros(map_height, map_width);
+R7=zeros(map_height, map_width);
+R8=zeros(map_height, map_width);
+R9=zeros(map_height, map_width);
+R10=zeros(map_height, map_width);
+R11=zeros(map_height, map_width);
+R12=zeros(map_height, map_width);
 
 for rows=1:1:map_height
     for cols=1:1:map_width
@@ -120,20 +149,7 @@ for rows=1:1:map_height
 end
 
 
-dist1=sqrt(((h1.XData-x1).^2)+((h1.YData-y1).^2));
-dist2=sqrt(((h2.XData-x2).^2)+((h2.YData-y2).^2));
-dist3=sqrt(((h3.XData-x3).^2)+((h3.YData-y3).^2));
-dist4=sqrt(((h4.XData-x4).^2)+((h4.YData-y4).^2));
-dist5=sqrt(((h5.XData-x5).^2)+((h5.YData-y5).^2));
-dist6=sqrt(((h6.XData-x6).^2)+((h6.YData-y6).^2));
-dist7=sqrt(((h7.XData-x7).^2)+((h7.YData-y7).^2));
-dist8=sqrt(((h8.XData-x8).^2)+((h8.YData-y8).^2));
-dist9=sqrt(((h9.XData-x9).^2)+((h9.YData-y9).^2));
-dist10=sqrt(((h10.XData-x10).^2)+((h10.YData-y10).^2));
-dist11=sqrt(((h11.XData-x11).^2)+((h11.YData-y11).^2));
-%dist12=sqrt(((h12.XData-x12).^2)+((h12.YData-y12).^2));
-
-
+% Calculate parameters for bisecting line perpendicular to source
 [a1,b1] = findLinePts(x1,y1);
 [a2,b2] = findLinePts(x2,y2);
 [a3,b3] = findLinePts(x3,y3);
@@ -147,6 +163,7 @@ dist11=sqrt(((h11.XData-x11).^2)+((h11.YData-y11).^2));
 [a11,b11] = findLinePts(x11,y11);
 %[a12,b12] = findLinePts(x12,y12);
 
+% Find boolean matrix for each obstacle
 isLeft1 = isLeft(a1,b1);
 isLeft2 = isLeft(a2,b2);
 isLeft3 = isLeft(a3,b3);
@@ -170,21 +187,22 @@ R7(isLeft7==0)=0;
 R8(isLeft8==0)=0;
 R9(isLeft9==0)=0;
 R10(isLeft10==0)=0;
-R11(isLeft11==0)=0;
+%R11(isLeft11==0)=0;
 %R12(isLeft12==0)=0;
 
-R1(R1>max(dist1))=0;
-R2(R2>max(dist2))=0;
-R3(R3>max(dist3))=0;
-R4(R4>max(dist4))=0;
-R5(R5>max(dist5))=0;
-R6(R6>max(dist6))=0;
-R7(R7>max(dist7))=0;
-R8(R8>max(dist8))=0;
-R9(R9>max(dist9))=0;
-R10(R10>max(dist10))=0;
-R11(R11>max(dist11))=0;
-% R12(R12<max(dist12))=0;
+% Threshold at attenuation "radius"
+R1(R1>1.*max(dist1))=0;
+R2(R2>1.1*max(dist2))=0;
+R3(R3>1.1*max(dist3))=0;
+R4(R4>1.1*max(dist4))=0;
+R5(R5>1.1*max(dist5))=0;
+R6(R6>1.1*max(dist6))=0;
+R7(R7>1.1*max(dist7))=0;
+R8(R8>1.1*max(dist8))=0;
+R9(R9>1.1*max(dist9))=0;
+R10(R10>1.1*max(dist10))=0;
+R11(R11>1.1*max(dist11))=0;
+% R12(R12<1.1*max(dist12))=0;
 
 source_strength=(9.45601235e17)./(4.*pi.*R.^2);
 %source_strength_steel_1 = (9.45601235e17)./(4.*pi.*R11.^2);
