@@ -187,7 +187,7 @@ R7(isLeft7==0)=0;
 R8(isLeft8==0)=0;
 R9(isLeft9==0)=0;
 R10(isLeft10==0)=0;
-%R11(isLeft11==0)=0;
+R11(isLeft11==0)=0;
 %R12(isLeft12==0)=0;
 
 % Threshold at attenuation "radius"
@@ -238,12 +238,12 @@ response_function=1.835e-3*cesium_137(1)*interaction_coefficient;
 response_function_steel_1=1.835e-3*steel(1)*interaction_coefficient_steel;
 Exposure1=response_function.*source_strength.*attenuation_at_R;
 
-Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10+attenuation_at_R11;
+Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
 %Exposure=Exposure1.*total_concrete_attenuation;
 %Exposure_steel_1=response_function_steel_1.*source_strength_steel_1.*attenuation_at_R11;
 Exposure_steel_2=response_function_steel_1.*source_strength_steel_2.*attenuation_at_R12;
 %Exposure=Exposure2+Exposure_steel_2;
-Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10+attenuation_at_R11;
+Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
 
 %%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
 %% 
