@@ -42,24 +42,24 @@ fig=figure; hold on; axis equal;
 % Define black border around action movement area
 h_border=line([xmin xmax xmax xmin xmin],[ymin ymin ymax ymax ymin],'Color','black','LineWidth',2);
 xlabel('X Coordinates (meters)'); ylabel('Y Coordinates (meters)');
-title('RRT Rigid (Differential Drive) (Pink Circle = Start; Pink Triangle = Goal; Black Circle = "Close Enough to Goal" Region)');
+title('Scenario 1 RRT (Differential Drive, Rigid Robot) (Pink Circle = Start; Pink Triangle = Goal; Black Circle = "Close Enough to Goal" Region)','FontSize',14);
 
 xl = [xmin xmax]; 
 yl = [ymin ymax];
 
-%%% Inputs
-air_density = 1205; % Dry air near sea level in g/m3
-concrete_density = 3150000;
-x_source=225;
-y_source=100;
-%%% Inputs
+air_density = 1205; % Dry air near sea level in g/m^3
+concrete_density = 3150000; % Density of concrete in g/m^3
+steel_density = 7190000; % Density of steel in g/m^3
+x_source=430;
+y_source=222;
 
+
+%%%%%%%%%%%%%%%%%%%%%%% START of LU's EDITS %%%%%%%%%%%%%%%%%%%%%%%%5
 map_height=232; %m
 map_width=450; %m
 [X,Y]=meshgrid([1:1:map_width],[1:1:map_height]);
 X=flip(X);
 Y=flip(Y);
-
 
 % Find x,y centroid of each obstacle
 [x1,y1]=calc_polygon_center([15 15 36 36 56 56 15],[108 168 168 130 130 108 108]);
@@ -72,6 +72,9 @@ Y=flip(Y);
 [x8,y8]=calc_polygon_center([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36]);
 [x9,y9]=calc_polygon_center([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139]);
 [x10,y10]=calc_polygon_center([358 358 439 439 358],[127 204 204 127 127]);
+[x11,y11]=calc_polygon_center([53 39 55 77 66 53],[4 23 37 14 4 4]);
+x11=round(x11); y11=round(y11);
+[x12,y12]=calc_polygon_center([251 251 312 312 251],[51 113 91 41 51]);
 
 h1=line([15 15 36 36 56 56 15],[108 168 168 130 130 108 108],'Color','white','LineWidth',3);
 h2=line([40 40 96 96 40],[192 216 216 192 192],'Color','white','LineWidth',3);
@@ -83,15 +86,18 @@ h7=line([350 350 426 426 350],[60 101 101 60 60],'Color','white','LineWidth',3);
 h8=line([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36],'Color','white','LineWidth',3);
 h9=line([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139],'Color','white','LineWidth',3);
 h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','white','LineWidth',3);
-
-
+h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','white','LineWidth',3);
+h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'LineStyle','--');
 
 cesium_137=[0.662,8.04e-6,7.065e-6,0.6,0.8];
 concrete = [0.662,8.062e-6,6.083e-6, 0.6,0.8];
+steel=[0.323,2.875e-6,2.953e-6,0.3,0.4];   % <-----NEED TO CHANGE THIS
 interaction_coefficient=extrapolation(cesium_137);
 interaction_coefficient_concrete=extrapolation(concrete);
+interaction_coefficient_steel=extrapolation(steel);
 total_miu= interaction_coefficient*air_density; % 1/m
 total_miu_concrete= interaction_coefficient_concrete*concrete_density; % 1/m
+total_miu_steel=interaction_coefficient_steel*steel_density;
 
 for rows=1:1:map_height
     for cols=1:1:map_width
@@ -106,6 +112,9 @@ for rows=1:1:map_height
         R8(rows,cols)=sqrt(((Y(rows,cols)-y8)^2)+((X(rows,cols)-x8)^2));
         R9(rows,cols)=sqrt(((Y(rows,cols)-y9)^2)+((X(rows,cols)-x9)^2));
         R10(rows,cols)=sqrt(((Y(rows,cols)-y10)^2)+((X(rows,cols)-x10)^2));
+        
+        R11(rows,cols)=sqrt(((Y(rows,cols)-y11)^2)+((X(rows,cols)-x11)^2));
+        R12(rows,cols)=sqrt(((Y(rows,cols)-y12)^2)+((X(rows,cols)-x12)^2));
     end
 end
 
@@ -119,6 +128,8 @@ dist7=sqrt(((h7.XData-x7).^2)+((h7.YData-y7).^2));
 dist8=sqrt(((h8.XData-x8).^2)+((h8.YData-y8).^2));
 dist9=sqrt(((h9.XData-x9).^2)+((h9.YData-y9).^2));
 dist10=sqrt(((h10.XData-x10).^2)+((h10.YData-y10).^2));
+dist11=sqrt(((h11.XData-x11).^2)+((h11.YData-y11).^2));
+dist12=sqrt(((h12.XData-x12).^2)+((h12.YData-y12).^2));
 R1(R1>max(dist1))=0;
 R2(R2>max(dist2))=0;
 R3(R3>max(dist3))=0;
@@ -129,8 +140,12 @@ R7(R7>max(dist7))=0;
 R8(R8>max(dist8))=0;
 R9(R9>max(dist9))=0;
 R10(R10>max(dist10))=0;
+R11(R11>max(dist11))=0;
+% R12(R12<max(dist12))=0;
 
 source_strength=(9.45601235e17)./(4.*pi.*R.^2);
+%source_strength_steel_1 = (9.45601235e17)./(4.*pi.*R11.^2);
+source_strength_steel_2 = (9.45601235e17)./(4.*pi.*R12.^2);
 % source_strength1=(9.45601235e17)./(4.*pi.*R1.^2);
 % source_strength2=(9.45601235e17)./(4.*pi.*R2.^2);
 % source_strength3=(9.45601235e17)./(4.*pi.*R3.^2);
@@ -141,7 +156,6 @@ source_strength=(9.45601235e17)./(4.*pi.*R.^2);
 % source_strength8=(9.45601235e17)./(4.*pi.*R8.^2);
 % source_strength9=(9.45601235e17)./(4.*pi.*R9.^2);
 % source_strength10=(9.45601235e17)./(4.*pi.*R10.^2);
-
 
 attenuation_at_R=exp(-total_miu.*abs(R));
 attenuation_at_R1=exp(-total_miu_concrete.*abs(R1));
@@ -154,13 +168,24 @@ attenuation_at_R7=exp(-total_miu_concrete.*abs(R7));
 attenuation_at_R8=exp(-total_miu_concrete.*abs(R8));
 attenuation_at_R9=exp(-total_miu_concrete.*abs(R9));
 attenuation_at_R10=exp(-total_miu_concrete.*abs(R10));
-total_concrete_attenuation=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10;
+attenuation_at_R11=exp(-total_miu_concrete.*abs(R11));
+attenuation_at_R12=exp(-.001.*abs(R12));
+
+total_concrete_attenuation=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
 
 response_function=1.835e-3*cesium_137(1)*interaction_coefficient;
+response_function_steel_1=1.835e-3*steel(1)*interaction_coefficient_steel;
 Exposure1=response_function.*source_strength.*attenuation_at_R;
 
-Exposure=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10;
+Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10+attenuation_at_R11;
 %Exposure=Exposure1.*total_concrete_attenuation;
+%Exposure_steel_1=response_function_steel_1.*source_strength_steel_1.*attenuation_at_R11;
+Exposure_steel_2=response_function_steel_1.*source_strength_steel_2.*attenuation_at_R12;
+%Exposure=Exposure2+Exposure_steel_2;
+Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10+attenuation_at_R11;
+
+%%%%%%%%%%%%%%%%%%%%% END of LU's EDITS %%%%%%%%%%%%%%%%%%%%
+
 
 Exposure_tmp=Exposure;
 Exposure_tmp(and(Exposure<1e9,Exposure>=5.5e8))=16;
@@ -189,8 +214,6 @@ hold on
 z = get(hh,'ZData');
 set(hh,'ZData',z-15)
 
-
-
 % Define obstacle space
 h1=line([15 15 36 36 56 56 15],[108 168 168 130 130 108 108],'Color','white','LineWidth',3);
 h2=line([40 40 96 96 40],[192 216 216 192 192],'Color','white','LineWidth',3);
@@ -202,25 +225,27 @@ h7=line([350 350 426 426 350],[60 101 101 60 60],'Color','white','LineWidth',3);
 h8=line([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36],'Color','white','LineWidth',3);
 h9=line([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139],'Color','white','LineWidth',3);
 h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','white','LineWidth',3);
+h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','white','LineWidth',3);
+h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'LineStyle','--');
 
 Exposure=flip(Exposure)';
+
 
 
 %%% TEMP (make user inputs)
 start_node=[15,15,30];
 goal_node=[x_source,y_source];
+%goal_node=[40,90];
 r=7;
 c=2;
-rpms=[20 20];
+rpms=[30 30];
 wheelRad=1;
 L=5;
 weight_exposure=0.9;
 weight_dist=0.1;
 %%% TEMP (make user inputs)
 
-
-
-Obstacles=[h1 h2 h3 h4 h5 h6 h7 h8 h9 h10];
+Obstacles=[h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12];
 startInObstacle = obstacleCheckRigid(Obstacles,start_node,r,c);
 goalInObstacle = obstacleCheckRigid(Obstacles,goal_node,r,c);
 
@@ -499,6 +524,7 @@ end
 % Backtrack to find optimal path, and plot it with a red line
 backTrackingFinished=0;
 k=0;
+k_tmp=0;
 
 T = struct2table(Nodes); % convert the struct array to a table
 toDelete = T.Explored == 0;
@@ -508,6 +534,7 @@ node_idx=Nodes(end).ID;
 delete(h_tmp); delete(h_tmp2);
 while backTrackingFinished==0
     k=k+1;
+    k_tmp=k_tmp+1;
     xxx = Nodes(node_idx).interpsX;
     yyy = Nodes(node_idx).interpsY;
     if or(and(xxx==0,yyy==0)==1,node_idx==1)
@@ -523,6 +550,19 @@ while backTrackingFinished==0
                     
     xVals(k)=Nodes(node_idx).x;
     yVals(k)=Nodes(node_idx).y;
+    
+    xVals_tmp(k_tmp)=Nodes(node_idx).x;
+    yVals_tmp(k_tmp)=Nodes(node_idx).y;
+    
+    if length(xxx)<=1
+    else
+        for iii=1:1:length(xxx)
+            k_tmp=k_tmp+1;
+            xVals_tmp(k_tmp)=xxx(iii);
+            yVals_tmp(k_tmp)=yyy(iii);
+        end
+    end
+    
     plot(Nodes(node_idx).x,Nodes(node_idx).y,'go','MarkerFaceColor','green','MarkerSize',5);
     nodeNum(k)=k;
     nodeIndex(k)=node_idx;
@@ -545,6 +585,10 @@ uistack(fig,'top');
 
 X_Values=flip(xVals);
 Y_Values=flip(yVals);
+
+X_Values_tmp=flip(xVals_tmp);
+Y_Values_tmp=flip(yVals_tmp);
+
 Left_Wheel_RPMs=flip(leftWheelVel);
 Right_Wheel_RPMs=flip(rightWheelVel);
 Orientation=flip(orientation);
@@ -583,4 +627,60 @@ disp(orientation_input)
 % End program run timer
 toc
 
+course=[X_Values_tmp;Y_Values_tmp;zeros(1,length(X_Values_tmp))]';
 
+figure; 
+map_lats=[38.983417,38.985492,38.985482,38.983420,38.983417]; 
+map_lons=[-76.945334,-76.945366,-76.940177,-76.940137,-76.945334];
+geoplot(map_lats,map_lons,'k-','LineWidth',3);
+geobasemap('topographic');
+geolimits([min(map_lats) max(map_lats)],[min(map_lons) max(map_lons)]);
+
+lla = enu2lla(course,[map_lats(1) map_lons(1) 0]);
+
+course1=[h1.XData;h1.YData;zeros(1,length(h1.XData))]';
+course2=[h2.XData;h2.YData;zeros(1,length(h2.XData))]';
+course3=[h3.XData;h3.YData;zeros(1,length(h3.XData))]';
+course4=[h4.XData;h4.YData;zeros(1,length(h4.XData))]';
+course5=[h5.XData;h5.YData;zeros(1,length(h5.XData))]';
+course6=[h6.XData;h6.YData;zeros(1,length(h6.XData))]';
+course7=[h7.XData;h7.YData;zeros(1,length(h7.XData))]';
+course8=[h8.XData;h8.YData;zeros(1,length(h8.XData))]';
+course9=[h9.XData;h9.YData;zeros(1,length(h9.XData))]';
+course10=[h10.XData;h10.YData;zeros(1,length(h10.XData))]';
+course11=[h11.XData;h11.YData;zeros(1,length(h11.XData))]';
+course12=[h12.XData;h12.YData;zeros(1,length(h12.XData))]';
+lla1 = enu2lla(course1,[map_lats(1) map_lons(1) 0]);
+lla2 = enu2lla(course2,[map_lats(1) map_lons(1) 0]);
+lla3 = enu2lla(course3,[map_lats(1) map_lons(1) 0]);
+lla4 = enu2lla(course4,[map_lats(1) map_lons(1) 0]);
+lla5 = enu2lla(course5,[map_lats(1) map_lons(1) 0]);
+lla6 = enu2lla(course6,[map_lats(1) map_lons(1) 0]);
+lla7 = enu2lla(course7,[map_lats(1) map_lons(1) 0]);
+lla8 = enu2lla(course8,[map_lats(1) map_lons(1) 0]);
+lla9 = enu2lla(course9,[map_lats(1) map_lons(1) 0]);
+lla10 = enu2lla(course10,[map_lats(1) map_lons(1) 0]);
+lla11 = enu2lla(course11,[map_lats(1) map_lons(1) 0]);
+lla12 = enu2lla(course12,[map_lats(1) map_lons(1) 0]);
+hold on;
+geoplot(lla1(:,1),lla1(:,2),'k-','LineWidth',2);
+geoplot(lla2(:,1),lla2(:,2),'k-','LineWidth',2);
+geoplot(lla3(:,1),lla3(:,2),'k-','LineWidth',2);
+geoplot(lla4(:,1),lla4(:,2),'k-','LineWidth',2);
+geoplot(lla5(:,1),lla5(:,2),'k-','LineWidth',2);
+geoplot(lla6(:,1),lla6(:,2),'k-','LineWidth',2);
+geoplot(lla7(:,1),lla7(:,2),'k-','LineWidth',2);
+geoplot(lla8(:,1),lla8(:,2),'k-','LineWidth',2);
+geoplot(lla9(:,1),lla9(:,2),'k-','LineWidth',2);
+geoplot(lla10(:,1),lla10(:,2),'k-','LineWidth',2);
+geoplot(lla11(:,1),lla11(:,2),'k-','LineWidth',2);
+geoplot(lla12(:,1),lla12(:,2),'k--','LineWidth',2);
+
+hold on;
+for hhh=1:1:length(lla)
+    geoplot(lla(hhh,1),lla(hhh,2),'bo','MarkerSize',3,'MarkerFaceColor','blue');
+end
+hold on;
+geoplot(lla(1,1), lla(1,2),'mo','MarkerFaceColor','m','MarkerSize',6);
+geoplot(lla(length(lla),1), lla(length(lla),2),'m^','MarkerFaceColor','m','MarkerSize',6);
+title('Calculated Path Plan on College Park Map Projection (Scenario 1)','FontSize',16);
