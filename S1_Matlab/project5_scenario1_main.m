@@ -104,7 +104,21 @@ dist8=sqrt(((h8.XData-x8).^2)+((h8.YData-y8).^2));
 dist9=sqrt(((h9.XData-x9).^2)+((h9.YData-y9).^2));
 dist10=sqrt(((h10.XData-x10).^2)+((h10.YData-y10).^2));
 dist11=sqrt(((h11.XData-x11).^2)+((h11.YData-y11).^2));
-%dist12=sqrt(((h12.XData-x12).^2)+((h12.YData-y12).^2));
+dist12=sqrt(((h12.XData-x12).^2)+((h12.YData-y12).^2));
+
+% Calc effective radius
+rad1=1.1*max(dist1);
+rad2=1.1*max(dist2);
+rad3=1.1*max(dist3);
+rad4=1.1*max(dist4);
+rad5=1.1*max(dist5);
+rad6=1.1*max(dist6);
+rad7=1.1*max(dist7);
+rad8=1.1*max(dist8);
+rad9=1.1*max(dist9);
+rad10=1.1*max(dist10);
+rad11=1.1*max(dist11);
+rad12=1.1*max(dist12);
 
 cesium_137=[0.662,8.04e-6,  7.065e-6, 0.6,0.8];
 concrete  =[0.662,8.062e-6, 6.083e-6, 0.6,0.8];
@@ -148,7 +162,20 @@ for rows=1:1:map_height
     end
 end
 
+% Back up Rs to use with obs12 later
+R1_12 = R1;
+R2_12 = R2;
+R3_12 = R3;
+R4_12 = R4;
+R5_12 = R5;
+R6_12 = R6;
+R7_12 = R7;
+R8_12 = R8;
+R9_12 = R9;
+R10_12 = R10;
+R11_12 = R11;
 
+% % Main source attenuation
 % Calculate parameters for bisecting line perpendicular to source
 [a1,b1] = findLinePts(x1,y1);
 [a2,b2] = findLinePts(x2,y2);
@@ -177,6 +204,24 @@ isLeft10 = isLeft(a10,b10);
 isLeft11 = isLeft(a11,b11);
 %isLeft12 = isLeft(a12,b12);
 
+% Find direction of source from each obstacle
+% 1=left, 0=right
+% Note:  Not working for obs7&10 for some reason so abandoned this approach
+% sourceDir1 = isLeft1(y_source, x_source);
+% sourceDir2 = isLeft2(y_source, x_source);
+% sourceDir3 = isLeft3(y_source, x_source);
+% sourceDir4 = isLeft4(y_source, x_source);
+% sourceDir5 = isLeft5(y_source, x_source);
+% sourceDir6 = isLeft6(y_source, x_source);
+% sourceDir7 = isLeft7(y_source, x_source);
+% sourceDir8 = isLeft8(y_source, x_source);
+% sourceDir9 = isLeft9(y_source, x_source);
+% sourceDir10 = isLeft10(y_source, x_source);
+% sourceDir11 = isLeft11(y_source, x_source);
+% %sourceDir12 = isLeft12(y_source, x_source);
+
+% Zero out values on source side of obstacle
+% R1(isLeft1==sourceDir1)=0;
 R1(isLeft1==0)=0;
 R2(isLeft2==0)=0;
 R3(isLeft3==0)=0;
@@ -191,18 +236,75 @@ R11(isLeft11==0)=0;
 %R12(isLeft12==0)=0;
 
 % Threshold at attenuation "radius"
-R1(R1>1.*max(dist1))=0;
-R2(R2>1.1*max(dist2))=0;
-R3(R3>1.1*max(dist3))=0;
-R4(R4>1.1*max(dist4))=0;
-R5(R5>1.1*max(dist5))=0;
-R6(R6>1.1*max(dist6))=0;
-R7(R7>1.1*max(dist7))=0;
-R8(R8>1.1*max(dist8))=0;
-R9(R9>1.1*max(dist9))=0;
-R10(R10>1.1*max(dist10))=0;
-R11(R11>1.1*max(dist11))=0;
-% R12(R12<1.1*max(dist12))=0;
+R1(R1>rad1)=0;
+R2(R2>rad2)=0;
+R3(R3>rad3)=0;
+R4(R4>rad4)=0;
+R5(R5>rad5)=0;
+R6(R6>rad6)=0;
+R7(R7>rad7)=0;
+R8(R8>rad8)=0;
+R9(R9>rad9)=0;
+R10(R10>rad10)=0;
+R11(R11>rad11)=0;
+% R12(R12<rad12)=0;
+
+
+% % Obstacle 12 attenuation
+% Calculate parameters for bisecting line perpendicular to 12
+[a1,b1] = findLinePts(x1,y1, x12,y12);
+[a2,b2] = findLinePts(x2,y2, x12,y12);
+[a3,b3] = findLinePts(x3,y3, x12,y12);
+[a4,b4] = findLinePts(x4,y4, x12,y12);
+[a5,b5] = findLinePts(x5,y5, x12,y12);
+[a6,b6] = findLinePts(x6,y6, x12,y12);
+[a7,b7] = findLinePts(x7,y7, x12,y12);
+[a8,b8] = findLinePts(x8,y8, x12,y12);
+[a9,b9] = findLinePts(x9,y9, x12,y12);
+[a10,b10] = findLinePts(x10,y10, x12,y12);
+[a11,b11] = findLinePts(x11,y11, x12,y12);
+
+% Find boolean matrix for each obstacle
+isLeft1 = isLeft(a1,b1);
+isLeft2 = isLeft(a2,b2);
+isLeft3 = isLeft(a3,b3);
+isLeft4 = isLeft(a4,b4);
+isLeft5 = isLeft(a5,b5);
+isLeft6 = isLeft(a6,b6);
+isLeft7 = isLeft(a7,b7);
+isLeft8 = isLeft(a8,b8);
+isLeft9 = isLeft(a9,b9);
+isLeft10 = isLeft(a10,b10);
+isLeft11 = isLeft(a11,b11);
+
+% Zero out values on source side of obstacle
+R1_12(isLeft1==0)=0;
+R2_12(isLeft2==0)=0;
+R3_12(isLeft3==0)=0;
+R4_12(isLeft4==0)=0;
+R5_12(isLeft5==0)=0;
+R6_12(isLeft6==0)=0;
+R7_12(isLeft7==1)=0;
+R8_12(isLeft8==0)=0;
+R9_12(isLeft9==1)=0;
+R10_12(isLeft10==1)=0;
+R11_12(isLeft11==0)=0;
+
+% Threshold at attenuation "radius"
+R1_12(R1_12>rad1)=0;
+R2_12(R2_12>rad2)=0;
+R3_12(R3_12>rad3)=0;
+R4_12(R4_12>rad4)=0;
+R5_12(R5_12>rad5)=0;
+R6_12(R6_12>rad6)=0;
+R7_12(R7_12>rad7)=0;
+R8_12(R8_12>rad8)=0;
+R9_12(R9_12>rad9)=0;
+R10_12(R10_12>rad10)=0;
+R11_12(R11_12>rad11)=0;
+
+
+% % Calculate exposures and attenuations
 
 source_strength=(9.45601235e17)./(4.*pi.*R.^2);
 %source_strength_steel_1 = (9.45601235e17)./(4.*pi.*R11.^2);
@@ -218,18 +320,21 @@ source_strength_steel_2 = (9.45601235e17)./(4.*pi.*R12.^2);
 % source_strength9=(9.45601235e17)./(4.*pi.*R9.^2);
 % source_strength10=(9.45601235e17)./(4.*pi.*R10.^2);
 
+% Including attenuation of Obs12 here 
 attenuation_at_R=exp(-total_miu.*abs(R));
-attenuation_at_R1=exp(-total_miu_concrete.*abs(R1));
-attenuation_at_R2=exp(-total_miu_concrete.*abs(R2));
-attenuation_at_R3=exp(-total_miu_concrete.*abs(R3));
-attenuation_at_R4=exp(-total_miu_concrete.*abs(R4));
-attenuation_at_R5=exp(-total_miu_concrete.*abs(R5));
-attenuation_at_R6=exp(-total_miu_concrete.*abs(R6));
-attenuation_at_R7=exp(-total_miu_concrete.*abs(R7));
-attenuation_at_R8=exp(-total_miu_concrete.*abs(R8));
-attenuation_at_R9=exp(-total_miu_concrete.*abs(R9));
-attenuation_at_R10=exp(-total_miu_concrete.*abs(R10));
-attenuation_at_R11=exp(-total_miu_concrete.*abs(R11));
+% NOTE FROM SHELLY:  These exponentials should be added, not multiplied,
+% but that wasn't working with your heat map thresholding
+attenuation_at_R1=exp(-total_miu_concrete.*abs(R1)) .* exp(-total_miu_concrete.*abs(R1_12));
+attenuation_at_R2=exp(-total_miu_concrete.*abs(R2)) .* exp(-total_miu_concrete.*abs(R2_12));
+attenuation_at_R3=exp(-total_miu_concrete.*abs(R3)) .* exp(-total_miu_concrete.*abs(R3_12));
+attenuation_at_R4=exp(-total_miu_concrete.*abs(R4)) .* exp(-total_miu_concrete.*abs(R4_12));
+attenuation_at_R5=exp(-total_miu_concrete.*abs(R5)) .* exp(-total_miu_concrete.*abs(R5_12));
+attenuation_at_R6=exp(-total_miu_concrete.*abs(R6)) .* exp(-total_miu_concrete.*abs(R6_12));
+attenuation_at_R7=exp(-total_miu_concrete.*abs(R7)) .* exp(-total_miu_concrete.*abs(R7_12));
+attenuation_at_R8=exp(-total_miu_concrete.*abs(R8)) .* exp(-total_miu_concrete.*abs(R8_12));
+attenuation_at_R9=exp(-total_miu_concrete.*abs(R9)) .* exp(-total_miu_concrete.*abs(R9_12));
+attenuation_at_R10=exp(-total_miu_concrete.*abs(R10)) .* exp(-total_miu_concrete.*abs(R10_12));
+attenuation_at_R11=exp(-total_miu_concrete.*abs(R11)) .* exp(-total_miu_concrete.*abs(R11_12));
 attenuation_at_R12=exp(-.001.*abs(R12));
 
 total_concrete_attenuation=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
@@ -244,6 +349,8 @@ Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*at
 Exposure_steel_2=response_function_steel_1.*source_strength_steel_2.*attenuation_at_R12;
 %Exposure=Exposure2+Exposure_steel_2;
 Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
+%  NOTE FROM SHELLY:  I think this should use the line below to match how Lu wrote the formulas in python 
+% Exposure=(Exposure1+Exposure_steel_2).*total_concrete_attenuation;
 
 %%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
 %% 
@@ -277,18 +384,18 @@ z = get(hh,'ZData');
 set(hh,'ZData',z-15)
 
 % Define obstacle space
-h1=line([15 15 36 36 56 56 15],[108 168 168 130 130 108 108],'Color','white','LineWidth',3);
-h2=line([40 40 96 96 40],[192 216 216 192 192],'Color','white','LineWidth',3);
-h3=line([89 89 112 112 89],[87 112 112 87 87],'Color','white','LineWidth',3);
-h4=line([77 77 99 99 122 122 145 145 77],[140 183 183 168 168 183 183 140 140],'Color','white','LineWidth',3);
-h5=line([93 93 190 190 93],[5 53 53 5 5],'Color','white','LineWidth',3);
-h6=line([154 154 225 225 154],[144 200 200 144 144],'Color','white','LineWidth',3);
-h7=line([350 350 426 426 350],[60 101 101 60 60],'Color','white','LineWidth',3);
-h8=line([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36],'Color','white','LineWidth',3);
-h9=line([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139],'Color','white','LineWidth',3);
-h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','white','LineWidth',3);
-h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','white','LineWidth',3);
-h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'LineStyle','--');
+% h1=line([15 15 36 36 56 56 15],[108 168 168 130 130 108 108],'Color','white','LineWidth',3);
+% h2=line([40 40 96 96 40],[192 216 216 192 192],'Color','white','LineWidth',3);
+% h3=line([89 89 112 112 89],[87 112 112 87 87],'Color','white','LineWidth',3);
+% h4=line([77 77 99 99 122 122 145 145 77],[140 183 183 168 168 183 183 140 140],'Color','white','LineWidth',3);
+% h5=line([93 93 190 190 93],[5 53 53 5 5],'Color','white','LineWidth',3);
+% h6=line([154 154 225 225 154],[144 200 200 144 144],'Color','white','LineWidth',3);
+% h7=line([350 350 426 426 350],[60 101 101 60 60],'Color','white','LineWidth',3);
+% h8=line([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36],'Color','white','LineWidth',3);
+% h9=line([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139],'Color','white','LineWidth',3);
+% h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','white','LineWidth',3);
+% h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','white','LineWidth',3);
+% h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'LineStyle','--');
 
 Exposure=flip(Exposure)';
 
