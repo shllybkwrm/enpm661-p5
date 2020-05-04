@@ -144,7 +144,10 @@ if __name__ == "__main__":
     
     fig,ax = plotMap(exposure_dict)
     # Note:  To plot without heatmap, send in no parameters:
-    fix1,ax1 = plotMap()
+    fig1,ax1 = plotMap()
+    # You can add the heatmap afterwards:
+    fig1,ax1 = plotHeatMap(fig1,ax1, exposure_dict)
+    
     plt.show()
     
     
