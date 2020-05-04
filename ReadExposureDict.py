@@ -25,6 +25,7 @@ def ReadDict():
     
     return exposure_dict
 
+
 def plotObstacles(ax):
     Source1_location = [150,120]
     Source2_location = [366,76]
@@ -64,13 +65,13 @@ def plotObstacles(ax):
     
     #################### PLOTTING DRY STORAGE CASK 1
     circle=Path.circle(Cask1_location, radius=Cask_rad)
-    sourcedrycast1=PathPatch(circle, facecolor='white', edgecolor='none')
+    sourcedrycast1=PathPatch(circle, facecolor='white', edgecolor='black')
     #################### PLOTTING DRY STORAGE CASK 2
     circle=Path.circle(Cask2_location, radius=Cask_rad)
-    sourcedrycast2=PathPatch(circle, facecolor='white', edgecolor='none')
+    sourcedrycast2=PathPatch(circle, facecolor='white', edgecolor='black')
     #################### PLOTTING DRY STORAGE CASK 3
     circle=Path.circle(Cask3_location, radius=Cask_rad)
-    sourcedrycast3=PathPatch(circle, facecolor='white', edgecolor='none')
+    sourcedrycast3=PathPatch(circle, facecolor='white', edgecolor='black')
     #################### TOOL BOX COORDINATE 
     TB_x_coord=400  # LOCATION OF TOOL BOX CENTER 
     TB_y_coord=40  # LOCATION OF TOOL BOX CENTER 
@@ -91,12 +92,13 @@ def plotObstacles(ax):
     ax.add_patch(sourcedrycast3)
     return ax
 
-def plotMap(exposure_dict):
+
+def plotHeatMap(fig,ax, exposure_dict):
     
     room_length = 732 # cm
     room_width = 152 # cm
     
-    # Include discretization factor here (from Exposure_function.py)
+    # Include discretization factor here (needs to match Exposure_function.py)
     grid = 1 #cm
     Xgrid = range(0, room_length, grid)
     Ygrid = range(0, room_width, grid)
@@ -108,17 +110,30 @@ def plotMap(exposure_dict):
             Total_Exposure[j,i] = exposure_dict[(i,j)]
     
     
-    fig, ax = plt.subplots()
     im = ax.imshow(Total_Exposure, norm=LogNorm())
     ax.set_title('Total exposure rate in log scale (scenario 2)')
     cb = fig.colorbar(im)
     cb.set_label("Exposure rate (R/hr)")
     
+    return fig,ax
+
+
+def plotMap(exposure_dict=None):
+    
+    room_length = 732 # cm
+    room_width = 152 # cm
+    
+     
+    fig,ax = plt.subplots()
+
+    if exposure_dict!=None:
+        fig,ax = plotHeatMap(fig,ax, exposure_dict)
     ax = plotObstacles(ax)
     
     ax.autoscale_view()
     plt.xlim(0,room_length)
     plt.ylim(0,room_width)
+    plt.gca().set_aspect('equal', adjustable='box')
     
     return fig,ax
 
@@ -128,6 +143,8 @@ if __name__ == "__main__":
     print(exposure_dict)
     
     fig,ax = plotMap(exposure_dict)
+    # Note:  To plot without heatmap, send in no parameters:
+    fix1,ax1 = plotMap()
     plt.show()
     
     

@@ -341,15 +341,15 @@ Exposure1=response_function.*source_strength.*attenuation_at_R;
 Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
 Exposure_steel_2=response_function_steel_1.*source_strength_steel_2.*attenuation_at_R12;
 %Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
-%  NOTE FROM SHELLY:  I think this should use the line below to match how Lu wrote the formulas in python 
+
 Exposure=(Exposure1+Exposure_steel_2).*total_concrete_attenuation;
-Exposure=log(Exposure);
+Exposure_log=log(Exposure);
 
 %%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
 %%%
 
 
-Exposure_tmp=Exposure;
+% Exposure_tmp=Exposure;
 % Exposure_tmp(and(Exposure<1e9,Exposure>=5.5e8))=16;
 % Exposure_tmp(and(Exposure<5.5e8,Exposure>=1e8))=15;
 % Exposure_tmp(and(Exposure<1e8,Exposure>=5.5e7))=14;
@@ -368,7 +368,7 @@ Exposure_tmp=Exposure;
 % Exposure_tmp(Exposure<5.5e1)=1;
 
 hold on;
-hh=surf(X,Y,Exposure_tmp,'FaceAlpha',.5,'EdgeAlpha',.5);
+hh=surf(X,Y,Exposure_log,'FaceAlpha',.5,'EdgeAlpha',.5);
 view(2)
 xlim([xmin xmax]); 
 ylim([ymin ymax]);
@@ -400,7 +400,7 @@ if or(startInObstacle==1,or(or(start_node(1)>xmax,start_node(1)<xmin),or(start_n
     while or(or(outside_obs_start==1,or(or(start_node(1)>xmax,start_node(1)<xmin),or(start_node(2)>ymax,start_node(2)<ymin))),or(start_node(1)==0,start_node(2)==0))
         % Display message if start node falls outside of action space 
         fprintf('\n');
-        disp('INAVLID START NODE LOCATION!');
+        disp('INVALID START NODE LOCATION!');
         fprintf('\n');
         prompt = 'Enter new x,y STARTING node location (e.g. [0,0,30]), relative to bottom left corner of action space: ';
         start_node = input(prompt);
@@ -413,7 +413,7 @@ if or(goalInObstacle==1,or(or(goal_node(1)>xmax,goal_node(1)<xmin),or(goal_node(
     while or(outside_obs_goal==1,or(or(goal_node(1)>xmax,goal_node(1)<xmin),or(goal_node(2)>ymax,goal_node(2)<ymin)))
         % Display message if goal node falls outside of action space 
         fprintf('\n');
-        disp('INAVLID GOAL NODE LOCATION!');
+        disp('INVALID GOAL NODE LOCATION!');
         fprintf('\n');
         prompt = 'Enter new x,y GOAL node location (e.g. [10,9]), relative to bottom left corner of action space: ';
         goal_node = input(prompt);
