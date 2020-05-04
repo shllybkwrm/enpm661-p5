@@ -317,55 +317,80 @@ R11_12(R11_12>rad11)=0;
 source_strength=(9.45601235e17)./(4.*pi.*R.^2);
 source_strength_steel = (9.45601235e17)./(4.*pi.*R12.^2);
 
-% Including attenuation of Obs12 here 
-attenuation_at_R=exp(-total_miu.*abs(R));
-attenuation_at_R1=exp(-total_miu_concrete.*abs(R1)) + exp(-total_miu_concrete.*abs(R1_12));
-attenuation_at_R2=exp(-total_miu_concrete.*abs(R2)) + exp(-total_miu_concrete.*abs(R2_12));
-attenuation_at_R3=exp(-total_miu_concrete.*abs(R3)) + exp(-total_miu_concrete.*abs(R3_12));
-attenuation_at_R4=exp(-total_miu_concrete.*abs(R4)) + exp(-total_miu_concrete.*abs(R4_12));
-attenuation_at_R5=exp(-total_miu_concrete.*abs(R5)) + exp(-total_miu_concrete.*abs(R5_12));
-attenuation_at_R6=exp(-total_miu_concrete.*abs(R6)) + exp(-total_miu_concrete.*abs(R6_12));
-attenuation_at_R7=exp(-total_miu_concrete.*abs(R7)) + exp(-total_miu_concrete.*abs(R7_12));
-attenuation_at_R8=exp(-total_miu_concrete.*abs(R8)) + exp(-total_miu_concrete.*abs(R8_12));
-attenuation_at_R9=exp(-total_miu_concrete.*abs(R9)) + exp(-total_miu_concrete.*abs(R9_12));
-attenuation_at_R10=exp(-total_miu_concrete.*abs(R10)) + exp(-total_miu_concrete.*abs(R10_12));
-attenuation_at_R11=exp(-total_miu_concrete.*abs(R11)) + exp(-total_miu_concrete.*abs(R11_12));
+% Attenuation of original source only
+attenuation_at_R =exp(-total_miu.*abs(R));
+attenuation_at_R1=exp(-total_miu_concrete.*abs(R1));
+attenuation_at_R2=exp(-total_miu_concrete.*abs(R2));
+attenuation_at_R3=exp(-total_miu_concrete.*abs(R3));
+attenuation_at_R4=exp(-total_miu_concrete.*abs(R4));
+attenuation_at_R5=exp(-total_miu_concrete.*abs(R5));
+attenuation_at_R6=exp(-total_miu_concrete.*abs(R6));
+attenuation_at_R7=exp(-total_miu_concrete.*abs(R7));
+attenuation_at_R8=exp(-total_miu_concrete.*abs(R8));
+attenuation_at_R9=exp(-total_miu_concrete.*abs(R9));
+attenuation_at_R10=exp(-total_miu_concrete.*abs(R10));
+attenuation_at_R11=exp(-total_miu_concrete.*abs(R11));
 attenuation_at_R12=exp(-0.001.*abs(R12));  % why not use miu_steel?
 
-total_concrete_attenuation=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
+concrete_attenuation_1=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
+% Remove some overlapping areas of 0s (which became 1 after exp) to prevent affecting entire map
+concrete_attenuation_1(concrete_attenuation_1==11)=1;
+%concrete_attenuation_1(concrete_attenuation_1==10)=1;
+
+% Attenuation of Obstacle 12 only
+attenuation_at_R1=exp(-total_miu_concrete.*abs(R1_12));
+attenuation_at_R2=exp(-total_miu_concrete.*abs(R2_12));
+attenuation_at_R3=exp(-total_miu_concrete.*abs(R3_12));
+attenuation_at_R4=exp(-total_miu_concrete.*abs(R4_12));
+attenuation_at_R5=exp(-total_miu_concrete.*abs(R5_12));
+attenuation_at_R6=exp(-total_miu_concrete.*abs(R6_12));
+attenuation_at_R7=exp(-total_miu_concrete.*abs(R7_12));
+attenuation_at_R8=exp(-total_miu_concrete.*abs(R8_12));
+attenuation_at_R9=exp(-total_miu_concrete.*abs(R9_12));
+attenuation_at_R10=exp(-total_miu_concrete.*abs(R10_12));
+attenuation_at_R11=exp(-total_miu_concrete.*abs(R11_12));
+
+concrete_attenuation_2=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
+concrete_attenuation_2(concrete_attenuation_2==11)=1;
+%concrete_attenuation_2(concrete_attenuation_2==10)=1;
 
 response_function=1.835e-3*cesium_137(1)*interaction_coefficient;
 response_function_steel=1.835e-3*steel(1)*interaction_coefficient_steel;
-Exposure1=response_function.*source_strength.*attenuation_at_R;
+Exposure_rate=response_function.*source_strength.*attenuation_at_R;
 
-%Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
-Exposure_steel=response_function_steel.*source_strength_steel.*attenuation_at_R12;
+%Exposure2=Exposure_rate.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
+%Exposure_steel=response_function_steel.*source_strength_steel.*attenuation_at_R12;
+%  Add 1/8 factor here??
+Exposure_rate_steel=response_function_steel.*(source_strength_steel).*attenuation_at_R12;
 
-%Exposure=(Exposure1+Exposure_steel).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
-Exposure=(Exposure1+Exposure_steel).*total_concrete_attenuation;
-Exposure_log=log(Exposure);  % For display only
+%Exposure=(Exposure_rate+Exposure_rate_steel).*concrete_attenuation_1;
+Exposure=Exposure_rate.*concrete_attenuation_1;
+Exposure_steel=Exposure_rate_steel.*concrete_attenuation_2;
+Total_Exposure = Exposure + Exposure_steel;
+% For display only:
+Exposure_log = log(Total_Exposure);
 
 %%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
 %%%
 
 
-% Exposure_tmp=Exposure;
-% Exposure_tmp(and(Exposure<1e9,Exposure>=5.5e8))=16;
-% Exposure_tmp(and(Exposure<5.5e8,Exposure>=1e8))=15;
-% Exposure_tmp(and(Exposure<1e8,Exposure>=5.5e7))=14;
-% Exposure_tmp(and(Exposure<5.5e7,Exposure>=1e7))=13;
-% Exposure_tmp(and(Exposure<1e7,Exposure>=5.5e6))=12;
-% Exposure_tmp(and(Exposure<5.5e6,Exposure>=1e6))=11;
-% Exposure_tmp(and(Exposure<1e6,Exposure>=5.5e5))=10;
-% Exposure_tmp(and(Exposure<5.5e5,Exposure>=1e5))=9;
-% Exposure_tmp(and(Exposure<1e5,Exposure>=5.5e4))=8;
-% Exposure_tmp(and(Exposure<5.5e4,Exposure>=1e4))=7;
-% Exposure_tmp(and(Exposure<1e4,Exposure>=5.5e3))=6;
-% Exposure_tmp(and(Exposure<5.5e3,Exposure>=1e3))=5;
-% Exposure_tmp(and(Exposure<1e3,Exposure>=5.5e2))=4;
-% Exposure_tmp(and(Exposure<5.5e2,Exposure>=1e2))=3;
-% Exposure_tmp(and(Exposure<1e2,Exposure>=5.5e1))=2;
-% Exposure_tmp(Exposure<5.5e1)=1;
+% Exposure_tmp=Total_Exposure;
+% Exposure_tmp(and(Total_Exposure<1e9,Total_Exposure>=5.5e8))=16;
+% Exposure_tmp(and(Total_Exposure<5.5e8,Total_Exposure>=1e8))=15;
+% Exposure_tmp(and(Total_Exposure<1e8,Total_Exposure>=5.5e7))=14;
+% Exposure_tmp(and(Total_Exposure<5.5e7,Total_Exposure>=1e7))=13;
+% Exposure_tmp(and(Total_Exposure<1e7,Total_Exposure>=5.5e6))=12;
+% Exposure_tmp(and(Total_Exposure<5.5e6,Total_Exposure>=1e6))=11;
+% Exposure_tmp(and(Total_Exposure<1e6,Total_Exposure>=5.5e5))=10;
+% Exposure_tmp(and(Total_Exposure<5.5e5,Total_Exposure>=1e5))=9;
+% Exposure_tmp(and(Total_Exposure<1e5,Total_Exposure>=5.5e4))=8;
+% Exposure_tmp(and(Total_Exposure<5.5e4,Total_Exposure>=1e4))=7;
+% Exposure_tmp(and(Total_Exposure<1e4,Total_Exposure>=5.5e3))=6;
+% Exposure_tmp(and(Total_Exposure<5.5e3,Total_Exposure>=1e3))=5;
+% Exposure_tmp(and(Total_Exposure<1e3,Total_Exposure>=5.5e2))=4;
+% Exposure_tmp(and(Total_Exposure<5.5e2,Total_Exposure>=1e2))=3;
+% Exposure_tmp(and(Total_Exposure<1e2,Total_Exposure>=5.5e1))=2;
+% Exposure_tmp(Total_Exposure<5.5e1)=1;
 
 hold on;
 hh=surf(X,Y,Exposure_log,'FaceAlpha',.5,'EdgeAlpha',.5);
@@ -374,11 +399,11 @@ c.Label.String = "Log of Exposure Values";
 view(2)
 xlim([xmin xmax]); 
 ylim([ymin ymax]);
-hold on
+hold on;  % should this be off?
 z = get(hh,'ZData');
 set(hh,'ZData',z-20)
 
-Exposure=flip(Exposure)';
+Total_Exposure=flip(Total_Exposure)';
 
 %%% TEMP (make user inputs)
 start_node=[12,20,30];
@@ -450,8 +475,8 @@ Nodes(1).Explored=0;
 Nodes(1).ParentID=0;
 Nodes(1).Theta=wrapTo2Pi(start_node(3));
 Nodes(1).ID=1;
-Nodes(1).Cost2Go=sqrt((abs(start_node(1)-goal_node(1))^2)+(abs(start_node(2)-goal_node(2))^2))+Exposure(Nodes(1).x,Nodes(1).y);
-Nodes(1).TotalCost=Nodes(1).Cost2Go+Exposure(start_node(1),start_node(2));
+Nodes(1).Cost2Go=sqrt((abs(start_node(1)-goal_node(1))^2)+(abs(start_node(2)-goal_node(2))^2))+Total_Exposure(Nodes(1).x,Nodes(1).y);
+Nodes(1).TotalCost=Nodes(1).Cost2Go+Total_Exposure(start_node(1),start_node(2));
 Nodes(1).interpsX=0;
 Nodes(1).interpsY=0;
 Nodes(1).LeftRPM=0;
@@ -594,7 +619,7 @@ while goal_node_explored==0
 
             if and(and(and(and(outsideObstaclesANDBorder==0,interpolatedSegmentsInBorder==0),or(goal_node_explored==0,and(and(newX>=xmin,newX<=xmax),and(newY>=ymin,newY<=ymax))))==1,num==0),and(CloseToOuterBorder_interps==0,CloseToOuterBorder==0))==1                                
                 cost2go=sqrt((abs(newX-x_source)^2)+(abs(newY-y_source)^2));
-                sumCost=(weight_exposure*Exposure(round(newX),round(newY)))+(weight_dist*cost2go);
+                sumCost=(weight_exposure*Total_Exposure(round(newX),round(newY)))+(weight_dist*cost2go);
                 Total_Cost(kk)=sumCost;
                 Anglees(kk)=Anglee;
                 x_vals(kk)=newX;
