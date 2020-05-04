@@ -1,4 +1,4 @@
-%%
+%%%
 % Chris Wheatley 
 % ENPM661 Spring 2020
 % Project #5 
@@ -51,8 +51,8 @@ air_density = 1205; % Dry air near sea level in g/m^3
 concrete_density = 3150000; % Density of concrete in g/m^3
 steel_density = 7190000; % Density of steel in g/m^3
 global x_source y_source
-x_source=430;
-y_source=222;
+x_source=400;
+y_source=218;
 
 
 %%%%%%%%%%%%%%%%%%%%%%% START of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,18 +64,31 @@ X=flip(X);
 Y=flip(Y);
 
 % Define vertices of every obstacle
-h1=line([15 15 36 36 56 56 15],[108 168 168 130 130 108 108],'Color','white','LineWidth',3);
-h2=line([40 40 96 96 40],[192 216 216 192 192],'Color','white','LineWidth',3);
-h3=line([89 89 112 112 89],[87 112 112 87 87],'Color','white','LineWidth',3);
-h4=line([77 77 99 99 122 122 145 145 77],[140 183 183 168 168 183 183 140 140],'Color','white','LineWidth',3);
-h5=line([93 93 190 190 93],[5 53 53 5 5],'Color','white','LineWidth',3);
-h6=line([154 154 225 225 154],[144 200 200 144 144],'Color','white','LineWidth',3);
-h7=line([350 350 426 426 350],[60 101 101 60 60],'Color','white','LineWidth',3);
-h8=line([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36],'Color','white','LineWidth',3);
-h9=line([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139],'Color','white','LineWidth',3);
-h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','white','LineWidth',3);
-h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','white','LineWidth',3);
-h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'LineStyle','--');
+h1=line([15 15 36 36 56 56 15],[108 168 168 130 130 108 108],'Color','black','LineWidth',3);
+h2=line([40 40 96 96 40],[192 216 216 192 192],'Color','black','LineWidth',3);
+h3=line([89 89 112 112 89],[87 112 112 87 87],'Color','black','LineWidth',3);
+h4=line([77 77 99 99 122 122 145 145 77],[140 183 183 168 168 183 183 140 140],'Color','black','LineWidth',3);
+h5=line([93 93 190 190 93],[5 53 53 5 5],'Color','black','LineWidth',3);
+h6=line([154 154 225 225 154],[144 200 200 144 144],'Color','black','LineWidth',3);
+h7=line([350 350 426 426 350],[60 101 101 60 60],'Color','black','LineWidth',3);
+h8=line([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36],'Color','black','LineWidth',3);
+h9=line([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139],'Color','black','LineWidth',3);
+h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','black','LineWidth',3);
+h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','black','LineWidth',3);
+h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','black','LineWidth',3,'LineStyle','--');
+fill(h1.XData,h1.YData,'w')
+fill(h2.XData,h2.YData,'w')
+fill(h3.XData,h3.YData,'w')
+fill(h4.XData,h4.YData,'w')
+fill(h5.XData,h5.YData,'w')
+fill(h6.XData,h6.YData,'w')
+fill(h7.XData,h7.YData,'w')
+fill(h8.XData,h8.YData,'w')
+fill(h9.XData,h9.YData,'w')
+fill(h10.XData,h10.YData,'w')
+fill(h11.XData,h11.YData,'w')
+fill(h12.XData,h12.YData,'w')
+
 
 % Find x,y centroid of each obstacle
 [x1,y1]=calc_polygon_center(h1.XData,h1.YData);
@@ -89,7 +102,6 @@ h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'
 [x9,y9]=calc_polygon_center(h9.XData,h9.YData);
 [x10,y10]=calc_polygon_center(h10.XData,h10.YData);
 [x11,y11]=calc_polygon_center(h11.XData,h11.YData);
-%x11=round(x11); y11=round(y11);
 [x12,y12]=calc_polygon_center(h12.XData,h12.YData);
 
 % Find distances from every vertex to center
@@ -188,7 +200,6 @@ R11_12 = R11;
 [a9,b9] = findLinePts(x9,y9);
 [a10,b10] = findLinePts(x10,y10);
 [a11,b11] = findLinePts(x11,y11);
-%[a12,b12] = findLinePts(x12,y12);
 
 % Find boolean matrix for each obstacle
 isLeft1 = isLeft(a1,b1);
@@ -249,7 +260,6 @@ R10(R10>rad10)=0;
 R11(R11>rad11)=0;
 % R12(R12<rad12)=0;
 
-
 % % Obstacle 12 attenuation
 % Calculate parameters for bisecting line perpendicular to 12
 [a1,b1] = findLinePts(x1,y1, x12,y12);
@@ -303,38 +313,23 @@ R9_12(R9_12>rad9)=0;
 R10_12(R10_12>rad10)=0;
 R11_12(R11_12>rad11)=0;
 
-
 % % Calculate exposures and attenuations
-
 source_strength=(9.45601235e17)./(4.*pi.*R.^2);
-%source_strength_steel_1 = (9.45601235e17)./(4.*pi.*R11.^2);
 source_strength_steel_2 = (9.45601235e17)./(4.*pi.*R12.^2);
-% source_strength1=(9.45601235e17)./(4.*pi.*R1.^2);
-% source_strength2=(9.45601235e17)./(4.*pi.*R2.^2);
-% source_strength3=(9.45601235e17)./(4.*pi.*R3.^2);
-% source_strength4=(9.45601235e17)./(4.*pi.*R4.^2);
-% source_strength5=(9.45601235e17)./(4.*pi.*R5.^2);
-% source_strength6=(9.45601235e17)./(4.*pi.*R6.^2);
-% source_strength7=(9.45601235e17)./(4.*pi.*R7.^2);
-% source_strength8=(9.45601235e17)./(4.*pi.*R8.^2);
-% source_strength9=(9.45601235e17)./(4.*pi.*R9.^2);
-% source_strength10=(9.45601235e17)./(4.*pi.*R10.^2);
 
 % Including attenuation of Obs12 here 
 attenuation_at_R=exp(-total_miu.*abs(R));
-% NOTE FROM SHELLY:  These exponentials should be added, not multiplied,
-% but that wasn't working with your heat map thresholding
-attenuation_at_R1=exp(-total_miu_concrete.*abs(R1)) .* exp(-total_miu_concrete.*abs(R1_12));
-attenuation_at_R2=exp(-total_miu_concrete.*abs(R2)) .* exp(-total_miu_concrete.*abs(R2_12));
-attenuation_at_R3=exp(-total_miu_concrete.*abs(R3)) .* exp(-total_miu_concrete.*abs(R3_12));
-attenuation_at_R4=exp(-total_miu_concrete.*abs(R4)) .* exp(-total_miu_concrete.*abs(R4_12));
-attenuation_at_R5=exp(-total_miu_concrete.*abs(R5)) .* exp(-total_miu_concrete.*abs(R5_12));
-attenuation_at_R6=exp(-total_miu_concrete.*abs(R6)) .* exp(-total_miu_concrete.*abs(R6_12));
-attenuation_at_R7=exp(-total_miu_concrete.*abs(R7)) .* exp(-total_miu_concrete.*abs(R7_12));
-attenuation_at_R8=exp(-total_miu_concrete.*abs(R8)) .* exp(-total_miu_concrete.*abs(R8_12));
-attenuation_at_R9=exp(-total_miu_concrete.*abs(R9)) .* exp(-total_miu_concrete.*abs(R9_12));
-attenuation_at_R10=exp(-total_miu_concrete.*abs(R10)) .* exp(-total_miu_concrete.*abs(R10_12));
-attenuation_at_R11=exp(-total_miu_concrete.*abs(R11)) .* exp(-total_miu_concrete.*abs(R11_12));
+attenuation_at_R1=exp(-total_miu_concrete.*abs(R1)) + exp(-total_miu_concrete.*abs(R1_12));
+attenuation_at_R2=exp(-total_miu_concrete.*abs(R2)) + exp(-total_miu_concrete.*abs(R2_12));
+attenuation_at_R3=exp(-total_miu_concrete.*abs(R3)) + exp(-total_miu_concrete.*abs(R3_12));
+attenuation_at_R4=exp(-total_miu_concrete.*abs(R4)) + exp(-total_miu_concrete.*abs(R4_12));
+attenuation_at_R5=exp(-total_miu_concrete.*abs(R5)) + exp(-total_miu_concrete.*abs(R5_12));
+attenuation_at_R6=exp(-total_miu_concrete.*abs(R6)) + exp(-total_miu_concrete.*abs(R6_12));
+attenuation_at_R7=exp(-total_miu_concrete.*abs(R7)) + exp(-total_miu_concrete.*abs(R7_12));
+attenuation_at_R8=exp(-total_miu_concrete.*abs(R8)) + exp(-total_miu_concrete.*abs(R8_12));
+attenuation_at_R9=exp(-total_miu_concrete.*abs(R9)) + exp(-total_miu_concrete.*abs(R9_12));
+attenuation_at_R10=exp(-total_miu_concrete.*abs(R10)) + exp(-total_miu_concrete.*abs(R10_12));
+attenuation_at_R11=exp(-total_miu_concrete.*abs(R11)) + exp(-total_miu_concrete.*abs(R11_12));
 attenuation_at_R12=exp(-.001.*abs(R12));
 
 total_concrete_attenuation=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
@@ -344,35 +339,33 @@ response_function_steel_1=1.835e-3*steel(1)*interaction_coefficient_steel;
 Exposure1=response_function.*source_strength.*attenuation_at_R;
 
 Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
-%Exposure=Exposure1.*total_concrete_attenuation;
-%Exposure_steel_1=response_function_steel_1.*source_strength_steel_1.*attenuation_at_R11;
 Exposure_steel_2=response_function_steel_1.*source_strength_steel_2.*attenuation_at_R12;
-%Exposure=Exposure2+Exposure_steel_2;
-Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
+%Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
 %  NOTE FROM SHELLY:  I think this should use the line below to match how Lu wrote the formulas in python 
-% Exposure=(Exposure1+Exposure_steel_2).*total_concrete_attenuation;
+Exposure=(Exposure1+Exposure_steel_2).*total_concrete_attenuation;
+Exposure=log(Exposure);
 
 %%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
-%% 
+%%%
 
 
 Exposure_tmp=Exposure;
-Exposure_tmp(and(Exposure<1e9,Exposure>=5.5e8))=16;
-Exposure_tmp(and(Exposure<5.5e8,Exposure>=1e8))=15;
-Exposure_tmp(and(Exposure<1e8,Exposure>=5.5e7))=14;
-Exposure_tmp(and(Exposure<5.5e7,Exposure>=1e7))=13;
-Exposure_tmp(and(Exposure<1e7,Exposure>=5.5e6))=12;
-Exposure_tmp(and(Exposure<5.5e6,Exposure>=1e6))=11;
-Exposure_tmp(and(Exposure<1e6,Exposure>=5.5e5))=10;
-Exposure_tmp(and(Exposure<5.5e5,Exposure>=1e5))=9;
-Exposure_tmp(and(Exposure<1e5,Exposure>=5.5e4))=8;
-Exposure_tmp(and(Exposure<5.5e4,Exposure>=1e4))=7;
-Exposure_tmp(and(Exposure<1e4,Exposure>=5.5e3))=6;
-Exposure_tmp(and(Exposure<5.5e3,Exposure>=1e3))=5;
-Exposure_tmp(and(Exposure<1e3,Exposure>=5.5e2))=4;
-Exposure_tmp(and(Exposure<5.5e2,Exposure>=1e2))=3;
-Exposure_tmp(and(Exposure<1e2,Exposure>=5.5e1))=2;
-Exposure_tmp(Exposure<5.5e1)=1;
+% Exposure_tmp(and(Exposure<1e9,Exposure>=5.5e8))=16;
+% Exposure_tmp(and(Exposure<5.5e8,Exposure>=1e8))=15;
+% Exposure_tmp(and(Exposure<1e8,Exposure>=5.5e7))=14;
+% Exposure_tmp(and(Exposure<5.5e7,Exposure>=1e7))=13;
+% Exposure_tmp(and(Exposure<1e7,Exposure>=5.5e6))=12;
+% Exposure_tmp(and(Exposure<5.5e6,Exposure>=1e6))=11;
+% Exposure_tmp(and(Exposure<1e6,Exposure>=5.5e5))=10;
+% Exposure_tmp(and(Exposure<5.5e5,Exposure>=1e5))=9;
+% Exposure_tmp(and(Exposure<1e5,Exposure>=5.5e4))=8;
+% Exposure_tmp(and(Exposure<5.5e4,Exposure>=1e4))=7;
+% Exposure_tmp(and(Exposure<1e4,Exposure>=5.5e3))=6;
+% Exposure_tmp(and(Exposure<5.5e3,Exposure>=1e3))=5;
+% Exposure_tmp(and(Exposure<1e3,Exposure>=5.5e2))=4;
+% Exposure_tmp(and(Exposure<5.5e2,Exposure>=1e2))=3;
+% Exposure_tmp(and(Exposure<1e2,Exposure>=5.5e1))=2;
+% Exposure_tmp(Exposure<5.5e1)=1;
 
 hold on;
 hh=surf(X,Y,Exposure_tmp,'FaceAlpha',.5,'EdgeAlpha',.5);
@@ -381,37 +374,21 @@ xlim([xmin xmax]);
 ylim([ymin ymax]);
 hold on
 z = get(hh,'ZData');
-set(hh,'ZData',z-15)
-
-% Define obstacle space
-% h1=line([15 15 36 36 56 56 15],[108 168 168 130 130 108 108],'Color','white','LineWidth',3);
-% h2=line([40 40 96 96 40],[192 216 216 192 192],'Color','white','LineWidth',3);
-% h3=line([89 89 112 112 89],[87 112 112 87 87],'Color','white','LineWidth',3);
-% h4=line([77 77 99 99 122 122 145 145 77],[140 183 183 168 168 183 183 140 140],'Color','white','LineWidth',3);
-% h5=line([93 93 190 190 93],[5 53 53 5 5],'Color','white','LineWidth',3);
-% h6=line([154 154 225 225 154],[144 200 200 144 144],'Color','white','LineWidth',3);
-% h7=line([350 350 426 426 350],[60 101 101 60 60],'Color','white','LineWidth',3);
-% h8=line([219 219 200 200 219 219 238 238 219],[36 46 46 67 67 77 77 36 36],'Color','white','LineWidth',3);
-% h9=line([267 267 293 293 267 267 338 338 267],[139 160 160 175 175 206 206 139 139],'Color','white','LineWidth',3);
-% h10=line([358 358 439 439 358],[127 204 204 127 127],'Color','white','LineWidth',3);
-% h11=line([53 39 55 77 66 53],[4 23 37 14 4 4],'Color','white','LineWidth',3);
-% h12=line([251 251 312 312 251],[51 113 91 41 51],'Color','white','LineWidth',3,'LineStyle','--');
+set(hh,'ZData',z-20)
 
 Exposure=flip(Exposure)';
 
-
-
 %%% TEMP (make user inputs)
-start_node=[15,15,30];
+start_node=[12,20,30];
 goal_node=[x_source,y_source];
 %goal_node=[40,90];
-r=7;
-c=2;
-rpms=[30 30];
-wheelRad=1;
-L=5;
-weight_exposure=0.9;
-weight_dist=0.1;
+r=0.3;
+c=4;
+rpms=[8,8];
+wheelRad=.3;
+L=0.6;
+weight_exposure=0.3;
+weight_dist=0.7;
 %%% TEMP (make user inputs)
 
 Obstacles=[h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12];
@@ -420,7 +397,7 @@ goalInObstacle = obstacleCheckRigid(Obstacles,goal_node,r,c);
 
 if or(startInObstacle==1,or(or(start_node(1)>xmax,start_node(1)<xmin),or(start_node(2)>ymax,start_node(2)<ymin)))
     outside_obs_start=1;
-    while or(outside_obs_start==1,or(or(start_node(1)>xmax,start_node(1)<xmin),or(start_node(2)>ymax,start_node(2)<ymin)))
+    while or(or(outside_obs_start==1,or(or(start_node(1)>xmax,start_node(1)<xmin),or(start_node(2)>ymax,start_node(2)<ymin))),or(start_node(1)==0,start_node(2)==0))
         % Display message if start node falls outside of action space 
         fprintf('\n');
         disp('INAVLID START NODE LOCATION!');
@@ -444,7 +421,7 @@ if or(goalInObstacle==1,or(or(goal_node(1)>xmax,goal_node(1)<xmin),or(goal_node(
     end
 end
 
-%% 
+%%%
 
 % Start program run timer
 tic
@@ -533,21 +510,24 @@ while goal_node_explored==0
         else
         end
         
-        %xx=sortedS(1).x; yy=sortedS(1).y; 
-        %ParentIdx=sortedS(1).ID; 
-        %startAngle=sortedS(1).Theta;
-        %isExplored=sortedS(1).Explored;
-        
-        % Generate random x and y coordinates within map boundary
-        xmin1=xmin;
-        xmax1=xmax;
-        randX=xmin1+rand(1,1)*(xmax1-xmin1);
-        ymin1=ymin;
-        ymax1=ymax;
-        randY=ymin1+rand(1,1)*(ymax1-ymin1);
-        h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
+%         if sum(Xs>250)==0
+            xmin1=xmin;
+            xmax1=xmax;
+            randX=xmin1+rand(1,1)*(xmax1-xmin1);
+            ymin1=ymin;
+            ymax1=ymax;
+            randY=ymin1+rand(1,1)*(ymax1-ymin1);
+            h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
+%         else
+%             xmin1=xmax/2;
+%             xmax1=xmax;
+%             randX=xmin1+rand(1,1)*(xmax1-xmin1);
+%             ymin1=ymin;
+%             ymax1=ymax;
+%             randY=ymin1+rand(1,1)*(ymax1-ymin1);
+%             h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
+%         end
  
-        
         Xs=[Nodes.x];
         Ys=[Nodes.y];
         IDs=[Nodes.ID];
@@ -560,8 +540,6 @@ while goal_node_explored==0
         ParentIdx=IDs(MIN_IDX);
         startAngle=Angless(MIN_IDX);
         isExplored=EXPLORED(MIN_IDX);
-        
-        
     end
     kk=1;
     for k=1:1:length(rpm_vals)
@@ -592,6 +570,8 @@ while goal_node_explored==0
             checker2=checker2+sum(In2);
             checker3=checker3+sum(In3);
         end
+        CloseToOuterBorder=or(or((newX-xmin)<=(r+c),(xmax-newX)<=(r+c)),or((newY-ymin)<=(r+c),(ymax-newY)<=(r+c)));
+        CloseToOuterBorder_interps=sum(abs(xmax-interpX)<=(r+c))+sum(abs(xmin-interpX)<=(r+c))+sum(abs(ymax-interpY)<=(r+c))+sum(abs(ymin-interpY)<=(r+c));
         if or(or(or(checker>=1,checker1>=1),or(checker2>=1,checker3>=1)),or(or(newX>xmax,newX<xmin),or(newY>ymax,newY<ymin)))==1
             interpolatedSegmentsInBorder=1;
         else
@@ -610,7 +590,7 @@ while goal_node_explored==0
         
         if and(and(newX>=xmin,newY>=ymin),num==0)                
 
-            if and(and(and(outsideObstaclesANDBorder==0,interpolatedSegmentsInBorder==0),or(goal_node_explored==0,and(and(newX>=xmin,newX<=xmax),and(newY>=ymin,newY<=ymax))))==1,num==0)==1                
+            if and(and(and(and(outsideObstaclesANDBorder==0,interpolatedSegmentsInBorder==0),or(goal_node_explored==0,and(and(newX>=xmin,newX<=xmax),and(newY>=ymin,newY<=ymax))))==1,num==0),and(CloseToOuterBorder_interps==0,CloseToOuterBorder==0))==1                                
                 cost2go=sqrt((abs(newX-x_source)^2)+(abs(newY-y_source)^2));
                 sumCost=(weight_exposure*Exposure(round(newX),round(newY)))+(weight_dist*cost2go);
                 Total_Cost(kk)=sumCost;
@@ -734,7 +714,7 @@ while backTrackingFinished==0
         end
     end
     
-    plot(Nodes(node_idx).x,Nodes(node_idx).y,'go','MarkerFaceColor','green','MarkerSize',5);
+    plot(Nodes(node_idx).x,Nodes(node_idx).y,'g-','MarkerFaceColor','green','MarkerSize',5);
     nodeNum(k)=k;
     nodeIndex(k)=node_idx;
     leftWheelVel(k)=Nodes(node_idx).LeftRPM;
@@ -754,8 +734,11 @@ plot(goal_node(1), goal_node(2),'m^','MarkerFaceColor','m');
 drawnow
 uistack(fig,'top');
 
-X_Values=flip(xVals);
-Y_Values=flip(yVals);
+% Convert to VREP Coordinates
+X_Values=flip(xVals)/10;
+Y_Values=flip(yVals)/10;
+X_Values=X_Values-25;
+Y_Values=Y_Values-25;
 
 X_Values_tmp=flip(xVals_tmp);
 Y_Values_tmp=flip(yVals_tmp);
