@@ -138,8 +138,8 @@ steel     =[0.323,2.875e-6, 2.953e-6, 0.3,0.4];   % <-----NEED TO CHANGE THIS
 interaction_coefficient=extrapolation(cesium_137);
 interaction_coefficient_concrete=extrapolation(concrete);
 interaction_coefficient_steel=extrapolation(steel);
-total_miu= interaction_coefficient*air_density; % 1/m
-total_miu_concrete= interaction_coefficient_concrete*concrete_density; % 1/m
+total_miu=interaction_coefficient*air_density; % 1/m
+total_miu_concrete=interaction_coefficient_concrete*concrete_density; % 1/m
 total_miu_steel=interaction_coefficient_steel*steel_density;
 
 R=zeros(map_height, map_width);
@@ -315,7 +315,7 @@ R11_12(R11_12>rad11)=0;
 
 % % Calculate exposures and attenuations
 source_strength=(9.45601235e17)./(4.*pi.*R.^2);
-source_strength_steel_2 = (9.45601235e17)./(4.*pi.*R12.^2);
+source_strength_steel = (9.45601235e17)./(4.*pi.*R12.^2);
 
 % Including attenuation of Obs12 here 
 attenuation_at_R=exp(-total_miu.*abs(R));
@@ -330,20 +330,20 @@ attenuation_at_R8=exp(-total_miu_concrete.*abs(R8)) + exp(-total_miu_concrete.*a
 attenuation_at_R9=exp(-total_miu_concrete.*abs(R9)) + exp(-total_miu_concrete.*abs(R9_12));
 attenuation_at_R10=exp(-total_miu_concrete.*abs(R10)) + exp(-total_miu_concrete.*abs(R10_12));
 attenuation_at_R11=exp(-total_miu_concrete.*abs(R11)) + exp(-total_miu_concrete.*abs(R11_12));
-attenuation_at_R12=exp(-.001.*abs(R12));
+attenuation_at_R12=exp(-0.001.*abs(R12));  % why not use miu_steel?
 
 total_concrete_attenuation=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
 
 response_function=1.835e-3*cesium_137(1)*interaction_coefficient;
-response_function_steel_1=1.835e-3*steel(1)*interaction_coefficient_steel;
+response_function_steel=1.835e-3*steel(1)*interaction_coefficient_steel;
 Exposure1=response_function.*source_strength.*attenuation_at_R;
 
-Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
-Exposure_steel_2=response_function_steel_1.*source_strength_steel_2.*attenuation_at_R12;
-%Exposure=(Exposure1+Exposure_steel_2).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
+%Exposure2=Exposure1.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
+Exposure_steel=response_function_steel.*source_strength_steel.*attenuation_at_R12;
 
-Exposure=(Exposure1+Exposure_steel_2).*total_concrete_attenuation;
-Exposure_log=log(Exposure);
+%Exposure=(Exposure1+Exposure_steel).*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
+Exposure=(Exposure1+Exposure_steel).*total_concrete_attenuation;
+Exposure_log=log(Exposure);  % For display only
 
 %%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
 %%%
@@ -369,6 +369,8 @@ Exposure_log=log(Exposure);
 
 hold on;
 hh=surf(X,Y,Exposure_log,'FaceAlpha',.5,'EdgeAlpha',.5);
+c = colorbar;
+c.Label.String = "Log of Exposure Values";
 view(2)
 xlim([xmin xmax]); 
 ylim([ymin ymax]);

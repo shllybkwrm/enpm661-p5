@@ -5,7 +5,7 @@ Omololu Makinde, Shelly Bagchi
 
 Use this file to calculate the exposure values for Scenario 2
 and plot them on a heat map.
-Also contains ROS 
+Also contains ROS outputs
 """
 
 """
@@ -126,22 +126,6 @@ TBpatch = PathPatch(TB, facecolor='purple', edgecolor='purple')
 ##plt.ylim(0,152)
 
 
-
-####################### Densities ######################################
-argon_density= 0.001784 # Dry air near sea level in g cm3
-lead_density = 11.36
-concrete_density = 3.15
-#################### Interaction Coefficients FROM TABLES  #######################
-cesium_137 = np.array([0.662,8.04e-2,7.065e-2,0.6,0.8]) #mass interaction coefficient[MeV,mass interactions ( cm2/g),from Faw and Shultis,energis from Faw and Shultis]
-concrete = np.array([0.662,8.062e-2,6.083e-2, 0.6,0.8])
-lead = np.array([0.662,1.167e-1,8.408e-2, 0.6,0.8])
-####################### Function for extrapolating attenuation
-####################### Coefficients from NIST tables
-def extrapolation(isotope):
-    y1,y3,x1,x2,x3=isotope[1],isotope[2],isotope[3],isotope[0],isotope[4]
-    k=(y3-y1)/(x3-x1)
-    y2=(k*(x2-x1))+y1
-    return y2
 #################### Defining the map #########################
 ### Moved these to top ###
 # room_length = 732 # cm
@@ -306,16 +290,33 @@ d_cask3s2 = threshold(d_cask3s2)
 d_cask3s3 = threshold(d_cask3s3)
 
 
+
+####################### Densities ######################################
+argon_density= 0.001784 # Dry air near sea level in g cm3
+lead_density = 11.36
+concrete_density = 3.15
+#################### Interaction Coefficients FROM TABLES  #######################
+cesium_137 = np.array([0.662,8.04e-2,7.065e-2,0.6,0.8]) #mass interaction coefficient[MeV,mass interactions ( cm2/g),from Faw and Shultis,energis from Faw and Shultis]
+concrete = np.array([0.662,8.062e-2,6.083e-2, 0.6,0.8])
+lead = np.array([0.662,1.167e-1,8.408e-2, 0.6,0.8])
+####################### Function for extrapolating attenuation
+####################### Coefficients from NIST tables
+def extrapolation(isotope):
+    y1,y3,x1,x2,x3=isotope[1],isotope[2],isotope[3],isotope[0],isotope[4]
+    k=(y3-y1)/(x3-x1)
+    y2=(k*(x2-x1))+y1
+    return y2
+
 ###################### GammaEnergy = np.array([0.662]) # MeV, characteristic gamma for Cs 137
 ###################### For hot cell there will be multiple isotopes with different characteristic energies
 #####################  0.662 Mev Interaction Coefficients
-interaction_Coefficient= np.array([extrapolation(cesium_137)]) #cm2/g
-concrete_interaction_Coefficient= np.array([extrapolation(concrete)]) #cm2/g
-lead_interaction_Coefficient= np.array([extrapolation(lead)]) #cm2/g
+interaction_coefficient = np.array([extrapolation(cesium_137)]) #cm2/g
+lead_interaction_coefficient = np.array([extrapolation(lead)]) #cm2/g
+concrete_interaction_coefficient = np.array([extrapolation(concrete)]) #cm2/g
 ##################### Total Miu
-total_miu= interaction_Coefficient*argon_density # 1/cm
-lead_total_miu= interaction_Coefficient*lead_density # 1/cm
-concrete_total_miu= interaction_Coefficient*concrete_density # 1/cm
+total_miu = interaction_coefficient*argon_density # 1/cm
+lead_total_miu = lead_interaction_coefficient*lead_density # 1/cm
+concrete_total_miu = concrete_interaction_coefficient*concrete_density # 1/cm
 ##################### Source Strength
 ##
 source1_strength= (9.44601235e+14/3)/(((4* np.pi)*(d_source1**2)))
@@ -340,7 +341,7 @@ totalcaskattenuation=cask1attenuation+cask2attenuation+cask3attenuation
 ##
 attenuation_at_R= np.exp(-(total_miu*np.abs(R)))
 ##
-ResponseFunction=np.array(1.835e-8*cesium_137[0]*interaction_Coefficient) #R/cm2, R=roentgen
+ResponseFunction=np.array(1.835e-8*cesium_137[0]*interaction_coefficient) #R/cm2, R=roentgen
 Exposure_rate=ResponseFunction*Source_Strength*attenuation_at_R # R
 ##
 Exposure_rate_source1=ResponseFunction*source1_strength*source1attenuation_at_R # R
