@@ -33,6 +33,21 @@ Cask2_location = [400,100]
 Cask3_location = [600,100]
 Cask_rad = 20
 
+def py_ROScoord(pycoord):
+    roscoordx=np.abs((pycoord[0]/100)-3.66)
+    roscoordy=np.abs((pycoord[1]/100)-0.76)
+    ans=[roscoordx,roscoordy]
+    print("ROS COORDINATES",pycoord, ans)
+    return ans
+
+RSource1_location = py_ROScoord(Source1_location)
+RSource2_location = py_ROScoord(Source2_location)
+RSource3_location = py_ROScoord(Source3_location)
+RCask1_location = py_ROScoord(Cask1_location)
+RCask2_location = py_ROScoord(Cask2_location)
+RCask3_location = py_ROScoord(Cask3_location)
+start= [30,30]
+Rstart=py_ROScoord(start)
 
 def make(xcoord,ycoord,length, width):
     x=np.linspace((xcoord-length/2),(xcoord+length/2),length+1,dtype=int)
@@ -385,4 +400,5 @@ plt.ylim(0,room_width)
 # ax3.plot(EX)
 # plt.xlim(0,room_length)
 # plt.ylim(0,room_width)
-# plt.show()
+plt.show()
+
