@@ -1,12 +1,16 @@
-#from pylab import *
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
-import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
-import numpy as np
-#import itertools
+# -*- coding: utf-8 -*-
+"""
+ENPM661 Project 5, Spring 2020
+Omololu Makinde, Shelly Bagchi
+
+Use this file to calculate the exposure values for Scenario 2
+and plot them on a heat map.
+Also contains ROS 
+"""
 
 """
+Westinghouse Hot Cell
+
 The high-level cell was initially designed and constructed
 to accommodate the size and radiological conditions
 associated with a full-sized Westinghouse commercial plant
@@ -22,6 +26,16 @@ A heavy-duty manipulator with a hoist capability of 1,000 pounds...
 """
 
 
+#from pylab import *
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
+from matplotlib.colors import LogNorm
+#import itertools
+import sys
+
+
 room_length = 732 # cm
 room_width = 152 # cm
 # Reordered left to right
@@ -32,6 +46,7 @@ Cask1_location = [200,100]
 Cask2_location = [400,100]
 Cask3_location = [600,100]
 Cask_rad = 20
+
 
 def py_ROScoord(pycoord):
     roscoordx=np.abs((pycoord[0]/100)-3.66)
@@ -49,7 +64,7 @@ RCask3_location = py_ROScoord(Cask3_location)
 start= [30,30]
 Rstart=py_ROScoord(start)
 
-def make(xcoord,ycoord,length, width):
+def makeRect(xcoord,ycoord,length, width):
     x=np.linspace((xcoord-length/2),(xcoord+length/2),length+1,dtype=int)
     y=np.linspace((ycoord+width/2),(ycoord-width/2),width+1,dtype=int)
     x_1,y_1=np.meshgrid(x,y, indexing='xy')
@@ -61,20 +76,21 @@ robot_x_coord=30  #LOCATION OF THE EQUIPMENT ENTRY DOOR WHERE ROBOT WILL START
 robot_y_coord=30  #LOCATION OF THE EQUIPMENT ENTRY DOOR WHERE ROBOT WILL START
 robot_height=6
 robot_breadth=6
-Robot_points,rvertices=make(robot_x_coord,robot_y_coord,robot_breadth,robot_height)
+Robot_points,rvertices=makeRect(robot_x_coord,robot_y_coord,robot_breadth,robot_height)
 ########### PLOTTING THE ROBOT ################
 rcodes = [Path.MOVETO] + [Path.LINETO]*3 + [Path.CLOSEPOLY]
 robot = Path(rvertices,rcodes)
 robotpatch = PathPatch(robot, facecolor='green', edgecolor='green')
 #################### PLOTTING SOURCE 1
 circle=Path.circle(Source1_location, radius=1)
-source1patch=PathPatch(circle, facecolor='red', edgecolor='green')
+source1patch=PathPatch(circle, facecolor='red', edgecolor='red')
 #################### PLOTTING SOURCE 2
 circle=Path.circle(Source2_location, radius=1)
-source2patch=PathPatch(circle, facecolor='red', edgecolor='green')
+source2patch=PathPatch(circle, facecolor='red', edgecolor='red')
 #################### PLOTTING SOURCE 3
 circle=Path.circle(Source3_location, radius=1)
-source3patch=PathPatch(circle, facecolor='red', edgecolor='green')
+source3patch=PathPatch(circle, facecolor='red', edgecolor='red')
+
 #################### PLOTTING DRY STORAGE CASK 1
 circle=Path.circle(Cask1_location, radius=Cask_rad)
 sourcedrycast1=PathPatch(circle, facecolor='white', edgecolor='none')
@@ -84,12 +100,12 @@ sourcedrycast2=PathPatch(circle, facecolor='white', edgecolor='none')
 #################### PLOTTING DRY STORAGE CASK 3
 circle=Path.circle(Cask3_location, radius=Cask_rad)
 sourcedrycast3=PathPatch(circle, facecolor='white', edgecolor='none')
-#################### TOOL BOX COORDINATE
-TB_x_coord=400  #LOCATION OF TOOL BOX center
-TB_y_coord=40  #LOCATION OF TOOL BOX center
+#################### TOOL BOX COORDINATE 
+TB_x_coord=400  # LOCATION OF TOOL BOX CENTER 
+TB_y_coord=40  # LOCATION OF TOOL BOX CENTER 
 TB_length= 200
 TB_height= 10
-TB_points, TBvertices=make(TB_x_coord,TB_y_coord,TB_length,TB_height)
+TB_points, TBvertices=makeRect(TB_x_coord,TB_y_coord,TB_length,TB_height)
 TB = Path(TBvertices,rcodes)
 TBpatch = PathPatch(TB, facecolor='purple', edgecolor='purple')
 
@@ -160,7 +176,7 @@ def findLinePts(Cask_loc, Source_loc):
 
 ### Find parameters of lines bisecting casks
 # Cask 1
-print("Cask1-Source1 line params")
+print('\n',"Cask1-Source1 line params")
 a_c1s1, b_c1s1 = findLinePts(Cask1_location, Source1_location)
 ans = isLeft(a_c1s1, b_c1s1, (300,100))
 print(ans)
@@ -339,13 +355,20 @@ EX=np.ma.array(Total_Exposure)
 
 #################### Exporting total exposure into file
 exposure_dict = {}
-# Discretize every 5cm
-Xgrid = range(0, room_length, 5)
-Ygrid = range(0, room_width, 5)
+# Discretize here as needed
+grid = 1 #cm
+Xgrid = range(0, room_length, grid)
+Ygrid = range(0, room_width, grid)
 
 for i in Xgrid:
     for j in Ygrid:
-        exposure_dict[(i,j)] = Total_Exposure[j,i]
+        exposure = Total_Exposure[j,i]
+        if exposure==float("inf"):  # dict reader can't handle inf so replace with max exposure
+            maxVal = Total_Exposure[np.isfinite(Total_Exposure)].max()
+            #print(maxVal)
+            exposure = maxVal
+            #exposure = sys.float_info.max
+        exposure_dict[(i,j)] = exposure
 
 # print(exposure_dict)
 f = open("Total_Exposure.txt", "w")
