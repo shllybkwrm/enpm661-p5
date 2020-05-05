@@ -1,3 +1,9 @@
+%%%
+% Shelly Bagchi
+% Function to determine whether each point is on the left or right of a
+% line bisecting the obstacle in question.  The line is defined by points
+% found from findLinePts(xc,yc).
+
 function [left] = isLeft(a,b)
 
 %Input Arguments:

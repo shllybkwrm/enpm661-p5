@@ -1,5 +1,5 @@
 %%%
-% Chris Wheatley 
+% Chris Wheatley, Shelly Bagchi
 % ENPM661 Spring 2020
 % Project #5 
 
@@ -53,7 +53,7 @@ steel_density = 7190000; % Density of steel in g/m^3
 global x_source y_source
 %x_source=400;
 %y_source=218;
-x_source=12;
+x_source=25;
 y_source=225;
 
 %%%%%%%%%%%%%%%%%%%%%%% START of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -141,6 +141,7 @@ interaction_coefficient_steel=extrapolation(steel);
 total_miu=interaction_coefficient*air_density; % 1/m
 total_miu_concrete=interaction_coefficient_concrete*concrete_density; % 1/m
 total_miu_steel=interaction_coefficient_steel*steel_density;
+total_miu_steel_air=interaction_coefficient_steel*air_density;
 
 R=zeros(map_height, map_width);
 R1=zeros(map_height, map_width);
@@ -216,7 +217,6 @@ isLeft11 = isLeft(a11,b11);
 
 % Find direction of source from each obstacle
 % 1=left, 0=right
-% Note:  Not working for obs7&10 for some reason so abandoned this approach
 sourceDir1 = isLeft1(ymax-y_source, x_source);
 sourceDir2 = isLeft2(ymax-y_source, x_source);
 sourceDir3 = isLeft3(ymax-y_source, x_source);
@@ -316,6 +316,7 @@ source_strength_steel = (9.45601235e17)./(4.*pi.*R12.^2);
 
 % Attenuation of original source only
 attenuation_at_R =exp(-total_miu.*abs(R));
+
 attenuation_at_R1=exp(-total_miu_concrete.*abs(R1));
 attenuation_at_R2=exp(-total_miu_concrete.*abs(R2));
 attenuation_at_R3=exp(-total_miu_concrete.*abs(R3));
@@ -327,12 +328,13 @@ attenuation_at_R8=exp(-total_miu_concrete.*abs(R8));
 attenuation_at_R9=exp(-total_miu_concrete.*abs(R9));
 attenuation_at_R10=exp(-total_miu_concrete.*abs(R10));
 attenuation_at_R11=exp(-total_miu_concrete.*abs(R11));
-% attenuation_at_R12=exp(-total_miu_steel.*abs(R12));
-attenuation_at_R12=exp(-.001.*abs(R12));
+
+attenuation_at_R12=exp(-total_miu_steel_air.*abs(R12));
+% attenuation_at_R12=exp(-.001.*abs(R12));
 
 concrete_attenuation_1=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
 % Remove some overlapping areas of 0s (which became 1 after exp) to prevent affecting entire map
-%concrete_attenuation_1(concrete_attenuation_1==11)=1;
+% concrete_attenuation_1(concrete_attenuation_1==11)=1;
 concrete_attenuation_1(concrete_attenuation_1==10)=1;
 
 % Attenuation of Obstacle 12 only
@@ -349,16 +351,17 @@ attenuation_at_R10=exp(-total_miu_concrete.*abs(R10_12));
 attenuation_at_R11=exp(-total_miu_concrete.*abs(R11_12));
 
 concrete_attenuation_2=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
-%concrete_attenuation_2(concrete_attenuation_2==11)=1;
+% concrete_attenuation_2(concrete_attenuation_2==11)=1;
+% concrete_attenuation_2(concrete_attenuation_2==10)=1;
 
 response_function=1.835e-3*cesium_137(1)*interaction_coefficient;
 response_function_steel=1.835e-3*steel(1)*interaction_coefficient_steel;
 Exposure_rate=response_function.*source_strength.*attenuation_at_R;
 
-%Exposure2=Exposure_rate.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
-%Exposure_steel=response_function_steel.*source_strength_steel.*attenuation_at_R12;
-%  Add 1/8 factor here??
-Exposure_rate_steel=response_function_steel.*(source_strength_steel).*attenuation_at_R12;
+% Exposure2=Exposure_rate.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
+% Exposure_steel=response_function_steel.*source_strength_steel.*attenuation_at_R12;
+%  Add 1/8 factor here?  e.g. 0.125*source_strength_steel
+Exposure_rate_steel=response_function_steel.*(0.25*source_strength_steel).*attenuation_at_R12;
 
 %Exposure=(Exposure_rate+Exposure_rate_steel).*concrete_attenuation_1;
 Exposure=Exposure_rate.*concrete_attenuation_1;
