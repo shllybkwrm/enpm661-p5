@@ -3,7 +3,7 @@
 % ENPM661 Spring 2020
 % Project #5 
 
-close all; 
+%close all; 
 clear all;
 
 % % Solicit input node configuration from user
@@ -51,9 +51,10 @@ air_density = 1205; % Dry air near sea level in g/m^3
 concrete_density = 3150000; % Density of concrete in g/m^3
 steel_density = 7190000; % Density of steel in g/m^3
 global x_source y_source
-x_source=400;
-y_source=218;
-
+%x_source=400;
+%y_source=218;
+x_source=12;
+y_source=225;
 
 %%%%%%%%%%%%%%%%%%%%%%% START of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%%%%%%
 global map_height map_width X Y
@@ -88,7 +89,6 @@ fill(h9.XData,h9.YData,'w')
 fill(h10.XData,h10.YData,'w')
 fill(h11.XData,h11.YData,'w')
 fill(h12.XData,h12.YData,'w')
-
 
 % Find x,y centroid of each obstacle
 [x1,y1]=calc_polygon_center(h1.XData,h1.YData);
@@ -134,7 +134,7 @@ rad12=1.1*max(dist12);
 
 cesium_137=[0.662,8.04e-6,  7.065e-6, 0.6,0.8];
 concrete  =[0.662,8.062e-6, 6.083e-6, 0.6,0.8];
-steel     =[0.323,2.875e-6, 2.953e-6, 0.3,0.4];   % <-----NEED TO CHANGE THIS
+steel     =[0.323,2.875e-6, 2.953e-6, 0.3,0.4];
 interaction_coefficient=extrapolation(cesium_137);
 interaction_coefficient_concrete=extrapolation(concrete);
 interaction_coefficient_steel=extrapolation(steel);
@@ -213,38 +213,20 @@ isLeft8 = isLeft(a8,b8);
 isLeft9 = isLeft(a9,b9);
 isLeft10 = isLeft(a10,b10);
 isLeft11 = isLeft(a11,b11);
-%isLeft12 = isLeft(a12,b12);
-
-% Find direction of source from each obstacle
-% 1=left, 0=right
-% Note:  Not working for obs7&10 for some reason so abandoned this approach
-% sourceDir1 = isLeft1(y_source, x_source);
-% sourceDir2 = isLeft2(y_source, x_source);
-% sourceDir3 = isLeft3(y_source, x_source);
-% sourceDir4 = isLeft4(y_source, x_source);
-% sourceDir5 = isLeft5(y_source, x_source);
-% sourceDir6 = isLeft6(y_source, x_source);
-% sourceDir7 = isLeft7(y_source, x_source);
-% sourceDir8 = isLeft8(y_source, x_source);
-% sourceDir9 = isLeft9(y_source, x_source);
-% sourceDir10 = isLeft10(y_source, x_source);
-% sourceDir11 = isLeft11(y_source, x_source);
-% %sourceDir12 = isLeft12(y_source, x_source);
 
 % Zero out values on source side of obstacle
 % R1(isLeft1==sourceDir1)=0;
-R1(isLeft1==0)=0;
-R2(isLeft2==0)=0;
-R3(isLeft3==0)=0;
-R4(isLeft4==0)=0;
-R5(isLeft5==0)=0;
-R6(isLeft6==0)=0;
-R7(isLeft7==0)=0;
-R8(isLeft8==0)=0;
-R9(isLeft9==0)=0;
-R10(isLeft10==0)=0;
-R11(isLeft11==0)=0;
-%R12(isLeft12==0)=0;
+R1(isLeft1==1)=0;
+R2(isLeft2==1)=0;
+R3(isLeft3==1)=0;
+R4(isLeft4==1)=0;
+R5(isLeft5==1)=0;
+R6(isLeft6==1)=0;
+R7(isLeft7==1)=0;
+R8(isLeft8==1)=0;
+R9(isLeft9==1)=0;
+R10(isLeft10==1)=0;
+R11(isLeft11==1)=0;
 
 % Threshold at attenuation "radius"
 R1(R1>rad1)=0;
@@ -330,12 +312,12 @@ attenuation_at_R8=exp(-total_miu_concrete.*abs(R8));
 attenuation_at_R9=exp(-total_miu_concrete.*abs(R9));
 attenuation_at_R10=exp(-total_miu_concrete.*abs(R10));
 attenuation_at_R11=exp(-total_miu_concrete.*abs(R11));
-attenuation_at_R12=exp(-0.001.*abs(R12));  % why not use miu_steel?
+attenuation_at_R12=exp(-.001.*abs(R12));
 
 concrete_attenuation_1=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
 % Remove some overlapping areas of 0s (which became 1 after exp) to prevent affecting entire map
-concrete_attenuation_1(concrete_attenuation_1==11)=1;
-%concrete_attenuation_1(concrete_attenuation_1==10)=1;
+%concrete_attenuation_1(concrete_attenuation_1==11)=1;
+concrete_attenuation_1(concrete_attenuation_1==10)=1;
 
 % Attenuation of Obstacle 12 only
 attenuation_at_R1=exp(-total_miu_concrete.*abs(R1_12));
@@ -351,8 +333,7 @@ attenuation_at_R10=exp(-total_miu_concrete.*abs(R10_12));
 attenuation_at_R11=exp(-total_miu_concrete.*abs(R11_12));
 
 concrete_attenuation_2=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
-concrete_attenuation_2(concrete_attenuation_2==11)=1;
-%concrete_attenuation_2(concrete_attenuation_2==10)=1;
+%concrete_attenuation_2(concrete_attenuation_2==11)=1;
 
 response_function=1.835e-3*cesium_137(1)*interaction_coefficient;
 response_function_steel=1.835e-3*steel(1)*interaction_coefficient_steel;
@@ -373,25 +354,6 @@ Exposure_log = log(Total_Exposure);
 %%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
 %%%
 
-
-% Exposure_tmp=Total_Exposure;
-% Exposure_tmp(and(Total_Exposure<1e9,Total_Exposure>=5.5e8))=16;
-% Exposure_tmp(and(Total_Exposure<5.5e8,Total_Exposure>=1e8))=15;
-% Exposure_tmp(and(Total_Exposure<1e8,Total_Exposure>=5.5e7))=14;
-% Exposure_tmp(and(Total_Exposure<5.5e7,Total_Exposure>=1e7))=13;
-% Exposure_tmp(and(Total_Exposure<1e7,Total_Exposure>=5.5e6))=12;
-% Exposure_tmp(and(Total_Exposure<5.5e6,Total_Exposure>=1e6))=11;
-% Exposure_tmp(and(Total_Exposure<1e6,Total_Exposure>=5.5e5))=10;
-% Exposure_tmp(and(Total_Exposure<5.5e5,Total_Exposure>=1e5))=9;
-% Exposure_tmp(and(Total_Exposure<1e5,Total_Exposure>=5.5e4))=8;
-% Exposure_tmp(and(Total_Exposure<5.5e4,Total_Exposure>=1e4))=7;
-% Exposure_tmp(and(Total_Exposure<1e4,Total_Exposure>=5.5e3))=6;
-% Exposure_tmp(and(Total_Exposure<5.5e3,Total_Exposure>=1e3))=5;
-% Exposure_tmp(and(Total_Exposure<1e3,Total_Exposure>=5.5e2))=4;
-% Exposure_tmp(and(Total_Exposure<5.5e2,Total_Exposure>=1e2))=3;
-% Exposure_tmp(and(Total_Exposure<1e2,Total_Exposure>=5.5e1))=2;
-% Exposure_tmp(Total_Exposure<5.5e1)=1;
-
 hold on;
 hh=surf(X,Y,Exposure_log,'FaceAlpha',.5,'EdgeAlpha',.5);
 c = colorbar;
@@ -399,14 +361,15 @@ c.Label.String = "Log of Exposure Values";
 view(2)
 xlim([xmin xmax]); 
 ylim([ymin ymax]);
-hold on;  % should this be off?
+hold on; 
 z = get(hh,'ZData');
-set(hh,'ZData',z-20)
+set(hh,'ZData',z-19)
 
-Total_Exposure=flip(Total_Exposure)';
+%Total_Exposure=flip(Total_Exposure)';
+Total_Exposure=flip(Exposure_log)';
 
 %%% TEMP (make user inputs)
-start_node=[12,20,30];
+start_node=[425,12,0];
 goal_node=[x_source,y_source];
 %goal_node=[40,90];
 r=0.3;
@@ -414,8 +377,9 @@ c=4;
 rpms=[8,8];
 wheelRad=.3;
 L=0.6;
-weight_exposure=0.3;
-weight_dist=0.7;
+weight_exposure=0.7;
+weight_dist=0.3;
+
 %%% TEMP (make user inputs)
 
 Obstacles=[h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12];
@@ -618,7 +582,8 @@ while goal_node_explored==0
         if and(and(newX>=xmin,newY>=ymin),num==0)                
 
             if and(and(and(and(outsideObstaclesANDBorder==0,interpolatedSegmentsInBorder==0),or(goal_node_explored==0,and(and(newX>=xmin,newX<=xmax),and(newY>=ymin,newY<=ymax))))==1,num==0),and(CloseToOuterBorder_interps==0,CloseToOuterBorder==0))==1                                
-                cost2go=sqrt((abs(newX-x_source)^2)+(abs(newY-y_source)^2));
+                %cost2go=sqrt((abs(newX-x_source)^2)+(abs(newY-y_source)^2));
+                cost2go=sqrt((abs(newX-randX)^2)+(abs(newY-randY)^2));
                 sumCost=(weight_exposure*Total_Exposure(round(newX),round(newY)))+(weight_dist*cost2go);
                 Total_Cost(kk)=sumCost;
                 Anglees(kk)=Anglee;
