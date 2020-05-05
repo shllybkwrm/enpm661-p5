@@ -4,7 +4,7 @@
 % Project #5 
 
 %close all; 
-clear all;
+clear;
 
 % % Solicit input node configuration from user
 % fprintf('\n');
@@ -214,19 +214,34 @@ isLeft9 = isLeft(a9,b9);
 isLeft10 = isLeft(a10,b10);
 isLeft11 = isLeft(a11,b11);
 
+% Find direction of source from each obstacle
+% 1=left, 0=right
+% Note:  Not working for obs7&10 for some reason so abandoned this approach
+sourceDir1 = isLeft1(ymax-y_source, x_source);
+sourceDir2 = isLeft2(ymax-y_source, x_source);
+sourceDir3 = isLeft3(ymax-y_source, x_source);
+sourceDir4 = isLeft4(ymax-y_source, x_source);
+sourceDir5 = isLeft5(ymax-y_source, x_source);
+sourceDir6 = isLeft6(ymax-y_source, x_source);
+sourceDir7 = isLeft7(ymax-y_source, x_source);
+sourceDir8 = isLeft8(ymax-y_source, x_source);
+sourceDir9 = isLeft9(ymax-y_source, x_source);
+sourceDir10 = isLeft10(ymax-y_source, x_source);
+sourceDir11 = isLeft11(ymax-y_source, x_source);
+
 % Zero out values on source side of obstacle
-% R1(isLeft1==sourceDir1)=0;
-R1(isLeft1==1)=0;
-R2(isLeft2==1)=0;
-R3(isLeft3==1)=0;
-R4(isLeft4==1)=0;
-R5(isLeft5==1)=0;
-R6(isLeft6==1)=0;
-R7(isLeft7==1)=0;
-R8(isLeft8==1)=0;
-R9(isLeft9==1)=0;
-R10(isLeft10==1)=0;
-R11(isLeft11==1)=0;
+% R1(isLeft1==1)=0;
+R1(isLeft1==sourceDir1)=0;
+R2(isLeft2==sourceDir2)=0;
+R3(isLeft3==sourceDir3)=0;
+R4(isLeft4==sourceDir4)=0;
+R5(isLeft5==sourceDir5)=0;
+R6(isLeft6==sourceDir6)=0;
+R7(isLeft7==sourceDir7)=0;
+R8(isLeft8==sourceDir8)=0;
+R9(isLeft9==sourceDir9)=0;
+R10(isLeft10==sourceDir10)=0;
+R11(isLeft11==sourceDir11)=0;
 
 % Threshold at attenuation "radius"
 R1(R1>rad1)=0;
@@ -312,6 +327,7 @@ attenuation_at_R8=exp(-total_miu_concrete.*abs(R8));
 attenuation_at_R9=exp(-total_miu_concrete.*abs(R9));
 attenuation_at_R10=exp(-total_miu_concrete.*abs(R10));
 attenuation_at_R11=exp(-total_miu_concrete.*abs(R11));
+% attenuation_at_R12=exp(-total_miu_steel.*abs(R12));
 attenuation_at_R12=exp(-.001.*abs(R12));
 
 concrete_attenuation_1=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
@@ -348,7 +364,7 @@ Exposure_rate_steel=response_function_steel.*(source_strength_steel).*attenuatio
 Exposure=Exposure_rate.*concrete_attenuation_1;
 Exposure_steel=Exposure_rate_steel.*concrete_attenuation_2;
 Total_Exposure = Exposure + Exposure_steel;
-% For display only:
+% For display only - do not use these values for algorithm
 Exposure_log = log(Total_Exposure);
 
 %%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
@@ -365,8 +381,10 @@ hold on;
 z = get(hh,'ZData');
 set(hh,'ZData',z-19)
 
-%Total_Exposure=flip(Total_Exposure)';
-Total_Exposure=flip(Exposure_log)';
+% We should use the real exposures for the algorithm, not the logs.  
+% Is it not working with the regular values?
+Total_Exposure=flip(Total_Exposure)';
+%Total_Exposure=flip(Exposure_log)';
 
 %%% TEMP (make user inputs)
 start_node=[425,12,0];
