@@ -394,9 +394,9 @@ Obstacles=[h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12];
 startInObstacle = obstacleCheckRigid(Obstacles,start_node,r,c);
 goalInObstacle = obstacleCheckRigid(Obstacles,goal_node,r,c);
 
-if or(startInObstacle==1,or(or(start_node(1)>xmax,start_node(1)<xmin),or(start_node(2)>ymax,start_node(2)<ymin)))
+if or(startInObstacle==1,or(or(start_node(1)>=xmax,start_node(1)<=xmin),or(start_node(2)>=ymax,start_node(2)<=ymin)))
     outside_obs_start=1;
-    while or(or(outside_obs_start==1,or(or(start_node(1)>xmax,start_node(1)<xmin),or(start_node(2)>ymax,start_node(2)<ymin))),or(start_node(1)==0,start_node(2)==0))
+    while or(or(outside_obs_start==1,or(or(start_node(1)>=xmax,start_node(1)<=xmin),or(start_node(2)>=ymax,start_node(2)<=ymin))),or(start_node(1)==0,start_node(2)==0))
         % Display message if start node falls outside of action space 
         fprintf('\n');
         disp('INVALID START NODE LOCATION!');
