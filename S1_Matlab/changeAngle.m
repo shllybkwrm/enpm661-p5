@@ -1,8 +1,11 @@
+%%% 
+% Chris Wheatley
+
 % This function ingests a node's location, angle, wheel radius, wheel distance, and wheel RPMs and generates a new
 %   node location and angle/orientation.
 function [newX,newY,newTheta,interpX,interpY,runningDist] = changeAngle(x,y,startAngle,rpmLeft,rpmRight,r,L)
-% Converting wheel RPMs from revolutions per minute to meters per
-%   second
+    % Converting wheel RPMs from revolutions per minute to meters per
+    %   second
     rpmLeft=rpmLeft*0.104719755;
     rpmRight=rpmRight*0.104719755;
 

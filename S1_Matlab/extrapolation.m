@@ -1,3 +1,4 @@
+% This function performs a simple extrapolation for attenuation coefficient
 function y2=extrapolation(isotope)
     y1=isotope(2);
     y3=isotope(3);

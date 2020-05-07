@@ -1,3 +1,7 @@
+%%%
+% Chris Wheatley
+% This function claulates the gemotric center of a shape defined by line
+%   segments
 function [x1, y1] = calc_polygon_center(x,y)
 
 %Input Arguments:

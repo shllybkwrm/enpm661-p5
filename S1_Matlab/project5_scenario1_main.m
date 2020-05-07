@@ -3,38 +3,34 @@
 % ENPM661 Spring 2020
 % Project #5 
 
-%close all; 
-clear;
+%%%  (MAIN SCRIPT)  %%%
 
-% % Solicit input node configuration from user
-% fprintf('\n');
-% prompt = 'Enter x,y START node location in meters and starting orientation in deg. (e.g. [1,1,30]): ';
-% start_node = input(prompt);
-% fprintf('\n');
-% 
-% % Solicit goal node configuration from user
-% fprintf('\n');
-% prompt1 = 'Enter x,y GOAL node location in meters (e.g. [10,9]): ';
-% goal_node = input(prompt1);
-% fprintf('\n');
-% 
-% % Calulated Paramaters From Datasheet
-% r=(354/2)/1000;
-% L=2*r;
-% wheelLength=pi*(76/1000);
-% wheelRad=(76/2)/1000;
-% 
-% % Solicit obstacle clearance from user
-% fprintf('\n');
-% prompt3 = 'Enter obstacle clearance (meters): ';
-% c = input(prompt3);
-% fprintf('\n');
-% 
-% % Solicit wheel RPMs from user
-% fprintf('\n');
-% prompt3 = 'Enter wheel RPMs [rpm1, rpm2]: ';
-% rpms = input(prompt3);
-% fprintf('\n');
+close all; 
+clear all;
+
+% Solicit input node configuration from user
+fprintf('\n');
+prompt = 'Enter x,y START node location in meters and starting orientation in deg. (e.g. [1,1,30]): ';
+start_node = input(prompt);
+fprintf('\n');
+
+% Solicit goal node configuration from user
+fprintf('\n');
+prompt1 = 'Enter "1" (to evaluate goal/source in top LEFT of map) or "2" (to evaluate goal/source in top RIGHT of map): ';
+source_info = input(prompt1);
+fprintf('\n');
+
+% Solicit obstacle clearance from user
+fprintf('\n');
+prompt3 = 'Enter obstacle clearance (meters): ';
+c = input(prompt3);
+fprintf('\n');
+
+% Solicit wheel RPMs from user
+fprintf('\n');
+prompt3 = 'Enter wheel RPMs [rpm1, rpm2]: ';
+rpms = input(prompt3);
+fprintf('\n');
 
 xmin=0; ymin=0;
 xmax=450; ymax=232;
@@ -51,12 +47,24 @@ air_density = 1205; % Dry air near sea level in g/m^3
 concrete_density = 3150000; % Density of concrete in g/m^3
 steel_density = 7190000; % Density of steel in g/m^3
 global x_source y_source
-%x_source=400;
-%y_source=218;
-x_source=25;
-y_source=225;
+if source_info==1
+    sourceInTopLeft=1;
+    sourceInTopRight=0;
+elseif source_info==2
+    sourceInTopLeft=0;
+    sourceInTopRight=1;
+else
+end
 
-%%%%%%%%%%%%%%%%%%%%%%% START of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%%%%%%
+if sourceInTopLeft==1
+    x_source=15;
+    y_source=212;
+elseif sourceInTopRight==1
+    x_source=400;
+    y_source=218;
+else
+end
+
 global map_height map_width X Y
 map_height=232; %m
 map_width=450; %m
@@ -230,7 +238,6 @@ sourceDir10 = isLeft10(ymax-y_source, x_source);
 sourceDir11 = isLeft11(ymax-y_source, x_source);
 
 % Zero out values on source side of obstacle
-% R1(isLeft1==1)=0;
 R1(isLeft1==sourceDir1)=0;
 R2(isLeft2==sourceDir2)=0;
 R3(isLeft3==sourceDir3)=0;
@@ -255,7 +262,6 @@ R8(R8>rad8)=0;
 R9(R9>rad9)=0;
 R10(R10>rad10)=0;
 R11(R11>rad11)=0;
-% R12(R12<rad12)=0;
 
 % % Obstacle 12 attenuation
 % Calculate parameters for bisecting line perpendicular to 12
@@ -310,7 +316,7 @@ R9_12(R9_12>rad9)=0;
 R10_12(R10_12>rad10)=0;
 R11_12(R11_12>rad11)=0;
 
-% % Calculate exposures and attenuations
+% Calculate exposures and attenuations
 source_strength=(9.45601235e17)./(4.*pi.*R.^2);
 source_strength_steel = (9.45601235e17)./(4.*pi.*R12.^2);
 
@@ -328,13 +334,10 @@ attenuation_at_R8=exp(-total_miu_concrete.*abs(R8));
 attenuation_at_R9=exp(-total_miu_concrete.*abs(R9));
 attenuation_at_R10=exp(-total_miu_concrete.*abs(R10));
 attenuation_at_R11=exp(-total_miu_concrete.*abs(R11));
-
 attenuation_at_R12=exp(-total_miu_steel_air.*abs(R12));
-% attenuation_at_R12=exp(-.001.*abs(R12));
 
 concrete_attenuation_1=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
 % Remove some overlapping areas of 0s (which became 1 after exp) to prevent affecting entire map
-% concrete_attenuation_1(concrete_attenuation_1==11)=1;
 concrete_attenuation_1(concrete_attenuation_1==10)=1;
 
 % Attenuation of Obstacle 12 only
@@ -351,32 +354,23 @@ attenuation_at_R10=exp(-total_miu_concrete.*abs(R10_12));
 attenuation_at_R11=exp(-total_miu_concrete.*abs(R11_12));
 
 concrete_attenuation_2=attenuation_at_R1+attenuation_at_R2+attenuation_at_R3+attenuation_at_R4+attenuation_at_R5+attenuation_at_R6+attenuation_at_R7+attenuation_at_R8+attenuation_at_R9+attenuation_at_R10+attenuation_at_R11;
-% concrete_attenuation_2(concrete_attenuation_2==11)=1;
-% concrete_attenuation_2(concrete_attenuation_2==10)=1;
 
 response_function=1.835e-3*cesium_137(1)*interaction_coefficient;
 response_function_steel=1.835e-3*steel(1)*interaction_coefficient_steel;
 Exposure_rate=response_function.*source_strength.*attenuation_at_R;
 
-% Exposure2=Exposure_rate.*attenuation_at_R1.*attenuation_at_R2.*attenuation_at_R3.*attenuation_at_R4.*attenuation_at_R5.*attenuation_at_R6.*attenuation_at_R7.*attenuation_at_R8.*attenuation_at_R9.*attenuation_at_R10.*attenuation_at_R11;
-% Exposure_steel=response_function_steel.*source_strength_steel.*attenuation_at_R12;
-%  Add 1/8 factor here?  e.g. 0.125*source_strength_steel
 Exposure_rate_steel=response_function_steel.*(0.25*source_strength_steel).*attenuation_at_R12;
 
-%Exposure=(Exposure_rate+Exposure_rate_steel).*concrete_attenuation_1;
 Exposure=Exposure_rate.*concrete_attenuation_1;
 Exposure_steel=Exposure_rate_steel.*concrete_attenuation_2;
 Total_Exposure = Exposure + Exposure_steel;
 % For display only - do not use these values for algorithm
 Exposure_log = log(Total_Exposure);
 
-%%%%%%%%%%%%%%%%%%%%% END of SHELLY/LU's EDITS %%%%%%%%%%%%%%%%%%%%
-%%%
-
 hold on;
 hh=surf(X,Y,Exposure_log,'FaceAlpha',.5,'EdgeAlpha',.5);
-c = colorbar;
-c.Label.String = "Log of Exposure Values";
+cc = colorbar;
+cc.Label.String = "Log of Exposure Values";
 view(2)
 xlim([xmin xmax]); 
 ylim([ymin ymax]);
@@ -384,24 +378,17 @@ hold on;
 z = get(hh,'ZData');
 set(hh,'ZData',z-19)
 
-% We should use the real exposures for the algorithm, not the logs.  
-% Is it not working with the regular values?
 Total_Exposure=flip(Total_Exposure)';
 %Total_Exposure=flip(Exposure_log)';
 
-%%% TEMP (make user inputs)
-start_node=[425,12,0];
 goal_node=[x_source,y_source];
-%goal_node=[40,90];
 r=0.3;
-c=4;
-rpms=[8,8];
 wheelRad=.3;
 L=0.6;
-weight_exposure=0.7;
-weight_dist=0.3;
-
-%%% TEMP (make user inputs)
+weight_exposure=0.000001;
+weight_dist=0.999999;
+% weight_exposure=0;
+% weight_dist=1;
 
 Obstacles=[h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12];
 startInObstacle = obstacleCheckRigid(Obstacles,start_node,r,c);
@@ -420,20 +407,18 @@ if or(startInObstacle==1,or(or(start_node(1)>xmax,start_node(1)<xmin),or(start_n
     end
 end
 
-if or(goalInObstacle==1,or(or(goal_node(1)>xmax,goal_node(1)<xmin),or(goal_node(2)>ymax,goal_node(2)<ymin)))
-    outside_obs_goal=1;
-    while or(outside_obs_goal==1,or(or(goal_node(1)>xmax,goal_node(1)<xmin),or(goal_node(2)>ymax,goal_node(2)<ymin)))
-        % Display message if goal node falls outside of action space 
+if or(source_info>2,source_info<1)==1
+    while or(source_info>2,source_info<1)==1
+        % Display message if goal node selection/toggle is either less than
+        %   1 or greater than 2
         fprintf('\n');
-        disp('INVALID GOAL NODE LOCATION!');
+        disp('INVALID SOURCE/GOAL NODE SELECTION! Please Enter "1" or "2"');
         fprintf('\n');
-        prompt = 'Enter new x,y GOAL node location (e.g. [10,9]), relative to bottom left corner of action space: ';
-        goal_node = input(prompt);
-        outside_obs_goal = obstacleCheckRigid(Obstacles,goal_node,r,c);
+        prompt1 = 'Enter "1" (to evaluate goal/source in top LEFT of map) or "2" (to evaluate goal/source in top RIGHT of map): ';
+        source_info = input(prompt1);      
     end
+else
 end
-
-%%%
 
 % Start program run timer
 tic
@@ -466,6 +451,7 @@ Nodes(1).interpsX=0;
 Nodes(1).interpsY=0;
 Nodes(1).LeftRPM=0;
 Nodes(1).RightRPM=0;
+Nodes(1).Exposure=Total_Exposure(round(start_node(1)),round(start_node(2)));
 
 % Convert angle to 0-2*pi scale
 start_node(3)=wrapTo2Pi(start_node(3));
@@ -492,7 +478,6 @@ xx=start_node(1); yy=start_node(2);
 startAngle=start_node(3);
 firstIteration=1;
 T=[];
-
 
 % While goal node HAS NOT BEEN EXPLORED, perform RRT
 while goal_node_explored==0
@@ -522,23 +507,44 @@ while goal_node_explored==0
         else
         end
         
-%         if sum(Xs>250)==0
-            xmin1=xmin;
-            xmax1=xmax;
-            randX=xmin1+rand(1,1)*(xmax1-xmin1);
-            ymin1=ymin;
-            ymax1=ymax;
-            randY=ymin1+rand(1,1)*(ymax1-ymin1);
-            h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
-%         else
-%             xmin1=xmax/2;
-%             xmax1=xmax;
-%             randX=xmin1+rand(1,1)*(xmax1-xmin1);
-%             ymin1=ymin;
-%             ymax1=ymax;
-%             randY=ymin1+rand(1,1)*(ymax1-ymin1);
-%             h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
-%         end
+        if sourceInTopLeft==1
+             if sum(and(Xs<45,Ys>185))~=0
+                xmin1=xmin;
+                xmax1=45;
+                randX=xmin1+rand(1,1)*(xmax1-xmin1);
+                ymin1=185;
+                ymax1=ymax;
+                randY=ymin1+rand(1,1)*(ymax1-ymin1);
+                h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
+             else
+                 xmin1=xmin;
+                 xmax1=xmax;
+                 randX=xmin1+rand(1,1)*(xmax1-xmin1);
+                 ymin1=ymin;
+                 ymax1=ymax;
+                 randY=ymin1+rand(1,1)*(ymax1-ymin1);
+                 h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
+             end
+        elseif sourceInTopRight==1
+             if sum(and(Xs>350,Ys>209))~=0
+                xmin1=350;                
+                xmax1=xmax;
+                randX=xmin1+rand(1,1)*(xmax1-xmin1);
+                ymin1=209;
+                ymax1=ymax;
+                randY=ymin1+rand(1,1)*(ymax1-ymin1);
+                h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
+             else
+                 xmin1=xmin;
+                 xmax1=xmax;
+                 randX=xmin1+rand(1,1)*(xmax1-xmin1);
+                 ymin1=ymin;
+                 ymax1=ymax;
+                 randY=ymin1+rand(1,1)*(ymax1-ymin1);
+                 h_tmp=plot(randX,randY,'ro','MarkerSize',10,'MarkerFaceColor','r');
+             end
+        else
+        end
  
         Xs=[Nodes.x];
         Ys=[Nodes.y];
@@ -605,7 +611,8 @@ while goal_node_explored==0
             if and(and(and(and(outsideObstaclesANDBorder==0,interpolatedSegmentsInBorder==0),or(goal_node_explored==0,and(and(newX>=xmin,newX<=xmax),and(newY>=ymin,newY<=ymax))))==1,num==0),and(CloseToOuterBorder_interps==0,CloseToOuterBorder==0))==1                                
                 %cost2go=sqrt((abs(newX-x_source)^2)+(abs(newY-y_source)^2));
                 cost2go=sqrt((abs(newX-randX)^2)+(abs(newY-randY)^2));
-                sumCost=(weight_exposure*Total_Exposure(round(newX),round(newY)))+(weight_dist*cost2go);
+                exposure=Total_Exposure(round(newX),round(newY));
+                sumCost=(weight_exposure*exposure)+(weight_dist*cost2go);
                 Total_Cost(kk)=sumCost;
                 Anglees(kk)=Anglee;
                 x_vals(kk)=newX;
@@ -624,9 +631,7 @@ while goal_node_explored==0
         else
         end
     end
-    
-    %Anglee=wrapTo2Pi(startAngle);
-    
+        
     if isempty(Total_Cost)==0
         [sumCost,min_idx]=min(Total_Cost);
         newX=x_vals(min_idx);
@@ -638,7 +643,6 @@ while goal_node_explored==0
         rpmRight=rpmRights(min_idx);
         h_tmp2=line([randX xx],[randY yy],'Color','red','LineStyle','--','LineWidth',1);
 
-        
         closeEnough=sqrt((goal_node(1)-newX)^2+(goal_node(2)-newY)^2)<5;
         if closeEnough==1
             goal_node_explored=1;
@@ -663,7 +667,7 @@ while goal_node_explored==0
         pp = spline(tt,xy);
         tInterp = linspace(1,numel(xxx));
         xyInterp = ppval(pp, tInterp);
-        plot(xyInterp(1,:),xyInterp(2,:),'b-');
+        plot(xyInterp(1,:),xyInterp(2,:),'w-');
         Nodes(i).x=newX;
         Nodes(i).y=newY;
         Nodes(i).ParentID=ParentIdx;
@@ -676,11 +680,9 @@ while goal_node_explored==0
         Nodes(i).interpsY=interpY;
         Nodes(i).LeftRPM=rpmLeft;
         Nodes(i).RightRPM=rpmRight;
-        %XS=[XS newX]; YS=[YS newY];
-
+        Nodes(i).Exposure=exposure;
         % Mark node as "Explored"
-        Nodes(ParentIdx).Explored=1;
-        
+        Nodes(ParentIdx).Explored=1;     
     else
     end
 end
@@ -733,6 +735,7 @@ while backTrackingFinished==0
     leftWheelVel(k)=Nodes(node_idx).LeftRPM;
     rightWheelVel(k)=Nodes(node_idx).RightRPM;
     orientation(k)=Nodes(node_idx).Theta;
+    exposure_vals(k)=Nodes(node_idx).Exposure; 
     node_idx=Nodes(node_idx).ParentID;
     
     if and(xVals(k)==start_node(1),yVals(k)==start_node(2))
@@ -759,30 +762,35 @@ Y_Values_tmp=flip(yVals_tmp);
 Left_Wheel_RPMs=flip(leftWheelVel);
 Right_Wheel_RPMs=flip(rightWheelVel);
 Orientation=flip(orientation);
+Exposures=flip(exposure_vals);
 
 x_val_input="x_vals={";
 y_val_input="y_vals={";
 left_vels_input="left_vels={";
 right_vels_input="right_vels={";
 orientation_input="orientations={";
+exposures_input="exposures={";
 for p=1:1:length(X_Values)
     x_val_input=strcat(x_val_input,string(X_Values(p)));
     y_val_input=strcat(y_val_input,string(Y_Values(p)));
     left_vels_input=strcat(left_vels_input,string(Left_Wheel_RPMs(p)));
     right_vels_input=strcat(right_vels_input,string(Right_Wheel_RPMs(p)));
     orientation_input=strcat(orientation_input,string(Orientation(p)));
+    exposures_input=strcat(exposures_input,string(Exposures(p)));
     if p==length(X_Values)
         x_val_input=strcat(x_val_input,"};");
         y_val_input=strcat(y_val_input,"};");
         left_vels_input=strcat(left_vels_input,"};");
         right_vels_input=strcat(right_vels_input,"};");
         orientation_input=strcat(orientation_input,"};");
+        exposures_input=strcat(exposures_input,"};");
     else
         x_val_input=strcat(x_val_input,",");
         y_val_input=strcat(y_val_input,",");
         left_vels_input=strcat(left_vels_input,",");
         right_vels_input=strcat(right_vels_input,",");
         orientation_input=strcat(orientation_input,",");
+        exposures_input=strcat(exposures_input,",");
     end
 end
 disp(x_val_input)
@@ -790,10 +798,14 @@ disp(y_val_input)
 disp(left_vels_input)
 disp(right_vels_input)
 disp(orientation_input)
+disp(exposures_input)
 
 % End program run timer
 toc
 
+
+% Generate selected path on a topographical map (showing actual College
+%   Park campus infrastructure)
 course=[X_Values_tmp;Y_Values_tmp;zeros(1,length(X_Values_tmp))]';
 
 figure; 
@@ -851,3 +863,5 @@ hold on;
 geoplot(lla(1,1), lla(1,2),'mo','MarkerFaceColor','m','MarkerSize',6);
 geoplot(lla(length(lla),1), lla(length(lla),2),'m^','MarkerFaceColor','m','MarkerSize',6);
 title('Calculated Path Plan on College Park Map Projection (Scenario 1)','FontSize',16);
+
+

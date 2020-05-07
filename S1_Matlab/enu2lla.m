@@ -1,6 +1,5 @@
-% WGS-84 east/north/up Cartesian to lat/lon/altitude 
-% Implements u-Blox paper (u-Blox is a Swiss manufacturer of GPS equipment)
-% inputs:
+% WGS-84 east/north/up Cartesian coordinates to lat/lon/altitude coordinates
+% Inputs:
     %  Input east/north/up data to be converted to lat/lon/alt - n x 3 matrix (n data points)
         % system reference lat/lon/alt: 1 x 3 vector: [lat lon alt]
         % enu data in meters
@@ -25,7 +24,6 @@ end
   e = sqrt((a^2-b^2)/a^2);
   ePrime = sqrt((a^2-b^2)/b^2);
   e2 = 2*f -f^2; % eccentricity squared 
- 
 
 % get ECEF of reference
 latRef = sys_ref(1)*pi/180;   % reference latitude converted to radians

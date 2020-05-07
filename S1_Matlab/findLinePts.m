@@ -1,9 +1,9 @@
 %%%
 % Shelly Bagchi
 % Function to find min and max points on line bisecting obstacle, 
-% perpendicular to radiation source.
-% Line points can be used to determine which side of the line a point is
-% on, using the function isLeft(a,b)
+%   perpendicular to radiation source.
+%   Line points can be used to determine which side of the line a point is
+%   on, using the function isLeft(a,b)
 
 function [a,b] = findLinePts(xc,yc, xs,ys)
 
