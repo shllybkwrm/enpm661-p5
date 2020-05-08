@@ -10,7 +10,7 @@ NN_Radius: It is an adjustable parameter that will allow for more nodes in the e
 
 How to run Program:
 ===================
-The program makes use of the following files:
+The program makes use of the following files that are stored on Github at https://github.com/shllybkwrm/enpm661-p5/tree/master/S2_python
 1.RRT_star_non_holonomic.py
 2.ReadExposureDict.py
 3.prj5_map.py
@@ -42,3 +42,5 @@ Most of the time comsumption is due to the dubin path computation for each segme
 Test Cases:
 The program is run for three different goal test points: (110,110), (320,125), (650,75).
 Pictures and video of the algorithm performance for each test case, are provided along with the rest of the files.
+In addition, videos can be accessed in the link below:
+Scenario 2 Python Simulation: https://umd.box.com/s/mk29fvnpftygwd7iovxfbj9pwq1sb9me
