@@ -198,3 +198,56 @@ def rrt_star(start_nd, goal_nd, goal_rad, clearance, radius, t_exposure):
 		print("sample ",i)
 	return node_min, nodes, child_parent, goal_list, goal_node_cost_list, nodesCost
 
+# Implementing backtracking function to retrieve optimal path from visited nodes   
+def backtrackingStartGoalPath(start,goal_thd,explored_path, nd_cost,x_y_exp,t_exposure):
+	pathlist = []
+	gl_cost_list = []
+	goalpath = goal_thd
+	pathlist.append(goal_thd)
+	print("RRT-star path Total Cost = ",nd_cost[goalpath])	
+	while goalpath != start:
+		pathlist.append(explored_path[goalpath])
+		gl_cost_list.append(nd_cost[goalpath])
+		goalpath = explored_path[goalpath]
+	pathlist.reverse()
+	gl_cost_list.reverse()
+	i = 1
+	for node in gl_cost_list:
+		x_rd5,y_rd5 = nearest_five(pathlist[i-1][0],pathlist[i-1][1])
+		x_y_exp += float(t_exposure[(x_rd5,y_rd5)]/3600)   # converting exposure/hr to exposure/seconds
+		print(x_y_exp)
+		print("Edge cost up to node ",i, " =",node)
+		i += 1
+	return pathlist,x_y_exp	
+
+# Plotting line between nodes
+def plot_curved_line(nodePar,nodeCh,linecolor):
+	pts = [nodePar, nodeCh]
+	turning_rad, dubin_segment, dubin_type = compute_dubin_curve(pts[0], pts[1], 20, 35) 
+	path, length = compute_trajectory(nodePar, turning_rad, dubin_segment, dubin_type, 1)
+	plt.plot(pts[0][0],pts[0][1],'.',color='orange')
+	plt.plot(pts[1][0],pts[1][1],'.',color='orange')
+	plt.plot(path[:,0]/10,path[:,1]/10,color=linecolor, linewidth=1)
+	mapImg = bufImage()
+	if cv2.waitKey(1) == ord('q'):	
+		exit()
+	cv2.imshow('RRT Algorithm', mapImg)
+
+# Plotting optimal path provided by rrts star 
+def plot_rrt_path(rrtPath):
+	rrtStarLen = len(rrtPath)-1
+	print("rrt-star Len = ",rrtStarLen)
+	i = 0
+	rrtPathNode = None
+	while i < rrtStarLen:
+		rrtPathNode = (rrtPath[i],rrtPath[i+1])
+		plot_curved_line(rrtPathNode[0],rrtPathNode[1], "red")
+		mapImg = bufImage()		
+		i = i+1
+	
+# Buffering image 
+def bufImage():
+	Obs_space.fig.canvas.draw()
+	mapImg = np.frombuffer(Obs_space.fig.canvas.tostring_rgb(), dtype=np.uint8).reshape(Obs_space.fig.canvas.get_width_height()[::-1] + (3,))
+	mapImg = cv2.cvtColor(mapImg,cv2.COLOR_RGB2BGR)
+	return mapImg
