@@ -12,6 +12,6 @@ Folders:
 * S1_Matlab:  Matlab R2020a & CoppeliaSim V-REP v4.0.0 implementation of Scenario 1 using RRT.  See specific Readme in /S1_Matlab/readme.txt
 
 
-* S2_Python:  Python 3.7 implementation of Scenario 2 using RRT and RRT-star.  See specific Readme in /S2_Python/readme.txt
+* S2_Python:  Python 3.6 implementation of Scenario 2 using RRT and RRT-star.  See specific Readme in /S2_Python/readme.txt
 
 * ROS:  ROS Kinetic & Gazebo Simulation.  See specific Readme in /S2_ROS/ROS_readme.txt
