@@ -1,6 +1,6 @@
 # enpm661-p5
 Project 5 for UMD-CP ENPM661, Spring 2020.
-Group members:  Shelly Bagchi, Omololu Makinde, Christian Ramos, Christopher Wheatley
+Group members:  Omololu Makinde, Shelly Bagchi, Christian Ramos, Christopher Wheatley
 
 Files
 Exposure_function.py:  Calculates exposures for Scenario 2 and plots map visualization
