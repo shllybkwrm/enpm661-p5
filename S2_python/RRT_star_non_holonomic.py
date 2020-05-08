@@ -96,3 +96,105 @@ def isDubinValid(curr_nd, clearance, radius):
 			valid = True
 		return valid
 
+# calculating distance between 2 coordinate points 	
+def calc_distance(x1, y1, x2, y2):
+	dist = m.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+	return dist
+
+#Round to nearest 5 multiple
+def nearest_five(x_in,y_in):
+	x_out = int(x_in / 5) * 5
+	y_out = int(y_in / 5) * 5
+	return x_out, y_out
+	
+# Calculate heuristic distance between 2 nodes
+def euclidean_dist(n_node, g_node):
+	distX = g_node[0] - n_node[0]
+	distY = g_node[1] - n_node[1]
+	euclDist = m.sqrt((distX)**2 + (distY)**2)
+	return euclDist
+
+# Implementing RRT star algorithm
+def rrt_star(start_nd, goal_nd, goal_rad, clearance, radius, t_exposure):
+	goal_list = []
+	goal_node_cost_list = {}
+	nodes = []
+	child_parent = {}
+	nodes.append(start_nd)					# Initialize tree with start node
+	child_parent[start_nd] = None
+	i = 1
+	nodesCost = {}
+	nodesCost[start_node] = 0
+	goal_achieved = False
+	while i < NUMBER_OF_SAMPLES:				# Looping through number of desired iterations 
+		rand_x  = random.randrange(0,732,1)				# random sample
+		rand_y  = random.randrange(0,152,1)
+		rand = (rand_x,rand_y)
+		if isNewNodeValid(rand, clearance, radius):
+			continue
+		nn = nodes[0]											
+		for p in nodes:					# Finding nearest node 
+			if euclidean_dist(p,rand) < euclidean_dist(nn,rand):
+				nn = p
+		node_min = distance_from_to(nn,rand)
+		if isNewNodeValid(node_min, clearance, radius):
+			continue
+		pts = [nn, node_min]
+		turning_rad1, dubin_segment1, dubin_type1 = compute_dubin_curve(pts[0], pts[1], 20, 35) 
+		path, newNdCost = compute_trajectory(nn, turning_rad1, dubin_segment1, dubin_type1, 1)
+		obs_flag = False
+		for node in path:
+			obs_flag = isDubinValid(node,clearance,radius)
+			if obs_flag == True:
+				break
+		if obs_flag == False:
+			nodes.append(node_min)			# Add new node to tree if not colliding 
+			child_parent[node_min] = nn
+			nodesCost[node_min] = newNdCost/10 + nodesCost[nn]
+			plot_curved_line(nn, node_min, "orange")	
+			XnearList = []
+			for p in nodes:							# Finding nearest node 
+				pts = [p, node_min]
+				turning_rad2, dubin_segment2, dubin_type2 = compute_dubin_curve(pts[0], pts[1], 20, 35) 
+				path, dist_near_ = compute_trajectory(p, turning_rad2, dubin_segment2, dubin_type2, 1)
+				dist_near_new = dist_near_/10
+				if dist_near_new <= 1.5*NN_Radius and p!= nn and p!= node_min:
+					XnearList.append([p,dist_near_new])
+			if XnearList:
+				XnearMinCost = XnearList[0][1]
+				XnMinNearest_node = XnearList[0][0]
+				for node in XnearList:
+					if node[1] < XnearMinCost:
+						XnearMinCost = node[1]
+						XnMinNearest_node = node[0]
+				pts = [XnMinNearest_node, node_min]
+				turning_rad3, dubin_segment3, dubin_type3 = compute_dubin_curve(pts[0], pts[1], 20, 35) 
+				path, newNearNdCost = compute_trajectory(XnMinNearest_node, turning_rad3, dubin_segment3, dubin_type3, 1)
+				x_min = nn
+				c_min = nodesCost[node_min]  
+				cost_xnear = nodesCost[XnMinNearest_node] + newNearNdCost/10
+				for node in path:
+					obs_flag = isDubinValid(node,clearance,radius)
+					if obs_flag == True:
+						break
+				if obs_flag == False:
+					if cost_xnear < c_min:
+						x_min = XnMinNearest_node
+						c_min = cost_xnear
+					# If node not colliding with obstacles or outside boundaries then add to List : Step 7
+					child_parent[node_min] = x_min
+					nodesCost[node_min] = c_min
+					plot_curved_line(XnMinNearest_node, node_min, "green")		
+		# If node is within goal threshold then add it to goal list						
+		if euclidean_dist(node_min,goal_nd) <= goal_rad:
+			#goal_achieved = True
+			goal_node_cost_list[node_min] =  nodesCost[node_min]
+			goal_list.append(node_min)
+			print("goal achieved")
+			plot_curved_line(nn, node_min, "black")
+			print("number of nodes to reach goal = ", i)
+			
+		i = i + 1
+		print("sample ",i)
+	return node_min, nodes, child_parent, goal_list, goal_node_cost_list, nodesCost
+
