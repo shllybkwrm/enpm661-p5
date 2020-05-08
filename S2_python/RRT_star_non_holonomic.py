@@ -420,3 +420,41 @@ def compute_segment(xp, segm, seg_t):
     segEnd[1] = segm[1] + segEnd[1]
     segEnd[2] = segm[2] + segEnd[2]
     return segEnd
+
+# Main Routine
+if __name__ == '__main__':
+	c = 10
+	r = 10
+	rad = m.pi/180
+	start_node = (30,30, 0)
+	goal_node  = (320, 125) # 1st goal (110,110), 2nd goal (320,125), 3rd goal (650,75)
+	goal_radius = 10
+	total_exposure = ReadDict()	
+	x_y_exposure = 0.0000
+	Obs_space = ObsMap(c,r)
+	goal_circ = plt.Circle((goal_node[0],goal_node[1]), radius=goal_radius, color='#F0DB4F')   # Drawing a goal threshold area in map
+	Obs_space.ax.add_patch(goal_circ)							
+	start_circ = plt.Circle((start_node[0],start_node[1]), radius=0.1, color='#333399')	# Drawing a goal threshold area in the map
+	Obs_space.ax.add_patch(start_circ)							
+	start = time.time()
+	print("Start time for RRT-Star algorithm = ",start)
+	goal_th, visited_nodes, child_parent_dict, gl_list,gl_cost_list, nodes_cost = rrt_star(start_node, goal_node, goal_radius, c, r, total_exposure)
+	print(gl_list)
+	print(gl_cost_list)
+	min_cost_gl = min(gl_cost_list.keys(), key=(lambda k: gl_cost_list[k]))
+	print("minimum cost path = ",min_cost_gl)
+	end = time.time()
+	print("End Time for RRT-Star algorithm = ",end)
+	print("Total Algorithm Time = ", (end - start), "seconds")
+	rrt_star_path,tot_exposure = backtrackingStartGoalPath(start_node,min_cost_gl,child_parent_dict, nodes_cost,x_y_exposure,total_exposure)  
+	print(rrt_star_path)
+	plot_rrt_path(rrt_star_path)
+	file1 = open("rrt_star_output.txt","a")
+	file1.write(str(rrt_star_path))
+	file1.write("\n")
+	file1.write(str(tot_exposure))
+	file1.close()
+	if cv2.waitKey(0):
+		exit()
+	cv2.destroyAllWindows()
+	
