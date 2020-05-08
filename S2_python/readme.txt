@@ -43,4 +43,4 @@ Test Cases:
 The program is run for three different goal test points: (110,110), (320,125), (650,75).
 Pictures and video of the algorithm performance for each test case, are provided along with the rest of the files.
 In addition, videos can be accessed in the link below:
-Scenario 2 Python Simulation: https://umd.box.com/s/mk29fvnpftygwd7iovxfbj9pwq1sb9me
+Scenario 2 Python Simulation videos: https://umd.box.com/s/wkm0pl5zlwsj9votmgros5u3y7iguna3
