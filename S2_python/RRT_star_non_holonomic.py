@@ -251,3 +251,172 @@ def bufImage():
 	mapImg = np.frombuffer(Obs_space.fig.canvas.tostring_rgb(), dtype=np.uint8).reshape(Obs_space.fig.canvas.get_width_height()[::-1] + (3,))
 	mapImg = cv2.cvtColor(mapImg,cv2.COLOR_RGB2BGR)
 	return mapImg
+
+# Dubins LSL calculation	
+def LSL(alpha, beta, d): 
+    p2_lsl = 2 + d**2 - (2*cos(alpha-beta)) + (2*d*(sin(alpha) - sin(beta)))
+    if p2_lsl>=0:
+        t = (-alpha + atan2((cos(beta)- cos(alpha)),(d + sin(alpha) - sin(beta)))) % (pi*2)
+        p = sqrt(p2_lsl)
+        q = (beta - atan2((cos(beta)- cos(alpha)),(d + sin(alpha) - sin(beta)))) % (pi*2)
+    else:
+        p = q = t = 100000
+    return t, p, q
+
+#Dubins RSR calculation
+def RSR(alpha, beta, d): 
+    p2_rsr = 2 + d**2 - (2*cos(alpha-beta)) + 2*d*(sin(beta) - sin(alpha))
+    if p2_rsr>=0:
+        t = (alpha - atan2((cos(alpha) - cos(beta)),(d - sin(alpha) + sin(beta)))) % (pi*2)
+        p = sqrt(p2_rsr)
+        q = (-beta + atan2((cos(alpha) - cos(beta)),(d - sin(alpha) + sin(beta)))) % (pi*2)
+    else:
+        p = q = t = 100000
+    return t, p, q
+
+#Dubins RSL calculation
+def RSL(alpha,beta,d): 
+    p2_rsl = -2 + d**2 + 2*cos(alpha - beta) - 2*d*(sin(alpha) + sin(beta))
+    if p2_rsl>=0:
+        p = sqrt(p2_rsl)
+        t = (alpha - atan2((cos(alpha)+cos(beta)),(d-sin(alpha)-sin(beta))) + atan2(2,p)) % (pi*2)
+        q = (beta - atan2((cos(alpha)+cos(beta)),(d-sin(alpha)-sin(beta))) + atan2(2,p)) % (pi*2)
+    else:
+        p = q = t = 100000
+    return t, p, q
+
+#Dubins LSR calculation
+def LSR(alpha, beta, d): 
+    p2_lsr = d**2 - 2 + 2*cos(alpha-beta) + 2*d*(sin(alpha) + sin(beta))
+    if p2_lsr>=0:
+        p = sqrt(p2_lsr)
+        t = ((atan2((-1*cos(alpha)-cos(beta)),(d+sin(alpha)+sin(beta)))+atan2(2,p))-alpha) % (pi*2)
+        q = ((atan2((-1*cos(alpha)-cos(beta)),(d+sin(alpha)+sin(beta)))+atan2(2,p))-beta) % (pi*2)
+    else:
+        p = q = t = 100000
+    return t, p, q
+
+#Dubins RLR calculation
+def RLR(alpha, beta, d):
+    p_rlr = (6 - d**2 + 2*cos(alpha-beta) + 2*d*(sin(alpha)-sin(beta)))/8
+    if(abs(p_rlr)<=1):
+        p = (2*pi - acos(p_rlr)) % (pi*2)
+        t = (alpha - atan2((cos(alpha)-cos(beta)), d-sin(alpha)+sin(beta)) + p/2 % (pi*2)) % (pi*2)
+        q = (alpha - beta - t + (p % (pi*2))) % (pi*2)
+    else:
+        p = q = t = 100000
+    return t, p, q
+
+#Dubins LRL calculation
+def LRL(alpha, beta, d):
+    p_lrl = ((6 - d**2 + 2*cos(alpha-beta) + 2*d*(sin(beta)-sin(alpha)))/8)
+    if(abs(p_lrl)<=1):
+        p = (2*pi - acos(p_lrl)) % (pi*2)
+        t = (-alpha - atan2((cos(alpha)-cos(beta)), d+sin(alpha)-sin(beta)) + p/2) % (pi*2)
+        q = ((beta % (pi*2))-alpha-t +(p % (pi*2))) % (pi*2)
+    else:
+        p = q = t = 100000
+    return t, p, q
+
+# Dubins curve coefficients calculation
+def compute_dubin_curve(pt1,pt2,vel,angle_lim):
+	pt1_angle = convert_angle(90 - pt1[2])
+	pt2_angle = convert_angle(90 - pt2[2])
+	turning_rad = (vel**2)/(9.8*tan(angle_lim*pi/180))
+	dx = pt2[0]*10 - pt1[0]*10
+	dy = pt2[1]*10 - pt1[1]*10
+	dist = sqrt(dx**2 + dy**2)
+	d = dist/turning_rad
+	theta = atan2(dy,dx) % (pi*2)
+	alpha = (pt1_angle - theta) % (pi*2)
+	beta = (pt2_angle - theta) % (pi*2)
+	dubin_seg = {}
+	t1, p1, q1 = LSL(alpha,beta,d)
+	len_LSL = t1 + p1 + q1
+	if len_LSL >= 0:
+		dubin_seg[len_LSL] = (0,[t1,p1,q1])
+	t2, p2, q2 = LSR(alpha,beta,d)
+	len_LSR = t2 + p2 + q2
+	if len_LSR >= 0:
+		dubin_seg[len_LSR] = (1,[t2,p2,q2])
+	t3, p3, q3 = RSL(alpha,beta,d)
+	len_RSL = t3 + p3 + q3
+	if len_RSL >= 0:
+		dubin_seg[len_RSL] = (2,[t3,p3,q3])
+	t4, p4, q4 = RSR(alpha,beta,d)
+	len_RSR = t4 + p4 + q4
+	if len_RSR >= 0:
+		dubin_seg[len_RSR] = (3,[t4,p4,q4])	
+	t5, p5, q5 = RLR(alpha,beta,d)
+	len_RLR = t5 + p5 + q5
+	if len_RLR >= 0:
+		dubin_seg[len_RLR] = (4,[t5,p5,q5])		
+	t6, p6, q6 = LRL(alpha,beta,d)
+	len_LRL = t6 + p6 + q6
+	if len_LRL >= 0:
+		dubin_seg[len_LRL] = (5,[t6,p6,q6])
+	min_cost_path = min(dubin_seg)
+	dubin_type = dubin_seg[min_cost_path][0]
+	dubin_segment = dubin_seg[min_cost_path][1]
+	return turning_rad, dubin_segment, dubin_type
+
+# Angle conversion to radians
+def convert_angle(theta):
+	if theta >= 360:
+		theta = (theta - 360)
+	if theta <= -360:
+		theta = (theta + 360)
+	theta_rad = theta*pi/180
+	return theta_rad
+
+# Computing Dubins trajectory
+def compute_trajectory(p1, turning_rad, dubin_segment, dubin_type,step):
+    length = floor(((dubin_segment[0]+dubin_segment[1]+dubin_segment[2])*turning_rad)/step)
+    length = int(length)
+    dub_path = np.zeros((length,3))
+    i = j = 0
+    while i < length:
+        dub_path[j] = compute_path(p1,turning_rad,dubin_segment,dubin_type,i)
+        i += step
+        j+=1
+    return dub_path, length
+
+#Computing dubin path for curves
+def compute_path(p1,turn_rad,dubin_segment,dubin_type, i):
+    xp = i/turn_rad
+    ang = convert_angle(90 - p1[2])
+    pStart = np.array([0,0,ang])
+    matTp = np.array([[1,2,1],[1,2,3],[3,2,1],[3,2,3],[3,1,3],[1,3,1]])
+    seg_t = matTp[dubin_type][:]
+    sp1 = compute_segment(dubin_segment[0],pStart,seg_t[0])
+    sp2 = compute_segment(dubin_segment[1],sp1,seg_t[1])
+    if(xp<dubin_segment[0]):
+        endP = compute_segment(xp,pStart,seg_t[0])
+    elif(xp<(dubin_segment[0]+dubin_segment[1])):
+        endP = compute_segment(xp-dubin_segment[0],sp1,seg_t[1])
+    else:
+        endP = compute_segment(xp-dubin_segment[0]-dubin_segment[1], sp2, seg_t[2])
+    endP[0] = endP[0]*turn_rad+p1[0]*10
+    endP[1] = endP[1]*turn_rad+p1[1]*10
+    endP[2] = endP[2] % (2*pi)
+    return endP
+
+# Computing Dubin path segments
+def compute_segment(xp, segm, seg_t):
+    segEnd = np.array([0.0,0.0,0.0])
+    if(seg_t == 1):
+        segEnd[0] = sin(segm[2]+xp)-sin(segm[2])
+        segEnd[1] = -cos(segm[2]+xp)+cos(segm[2])
+        segEnd[2] = xp
+    elif(seg_t == 2):
+        segEnd[0] = cos(segm[2])*xp
+        segEnd[1] = sin(segm[2])*xp
+        segEnd[2] = 0
+    elif(seg_t == 3):
+        segEnd[0] = -sin(segm[2]-xp)+sin(segm[2])
+        segEnd[1] = cos(segm[2]-xp)-cos(segm[2])
+        segEnd[2] = -xp
+    segEnd[0] = segm[0] + segEnd[0]
+    segEnd[1] = segm[1] + segEnd[1]
+    segEnd[2] = segm[2] + segEnd[2]
+    return segEnd
